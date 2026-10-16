@@ -102,7 +102,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "actividades.json"
-PASSWORD_DOCENTE = "ohi2026"  # Contraseña para el modo profesor/a
+PASSWORD_DOCENTE = "ohi2026"  # Contraseña del docente
 
 # -----------------------------------------------------------------------------
 # 2. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
