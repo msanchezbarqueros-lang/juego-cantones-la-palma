@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import json
+import os
 import streamlit as st
 import folium
 import streamlit.components.v1 as components
@@ -22,6 +24,8 @@ st.markdown("""
 Los estudiantes reconquistan el territorio de la isla mediante sus rutas registradas en archivos GPX.
 """)
 
+DATA_FILE = "actividades.json"
+
 # -----------------------------------------------------------------------------
 # 2. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
 # -----------------------------------------------------------------------------
@@ -32,7 +36,6 @@ def cargar_cantones_la_palma():
         gdf = gpd.read_file("cantones_la_palma.geojson")
         return gdf
     except Exception:
-        # Fallback en caso de que no encuentre el archivo GeoJSON
         cantones_data = [
             {"canton": "Tagalgen", "municipio": "Garafía", "geometry": sg.box(-17.95, 28.78, -17.85, 28.85)},
             {"canton": "Tagaragre", "municipio": "Barlovento", "geometry": sg.box(-17.85, 28.78, -17.78, 28.84)},
@@ -50,20 +53,9 @@ def cargar_cantones_la_palma():
         return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
 
 # -----------------------------------------------------------------------------
-# 3. PROCESAMIENTO DE ARCHIVOS GPX
+# 3. PROCESAMIENTO DE ARCHIVOS GPX Y PERSISTENCIA
 # -----------------------------------------------------------------------------
-def procesar_gpx_subido(archivo_gpx, max_dist_cierre_m=100.0, franja_m=30.0):
-    """Parsea el GPX y retorna la geometría proyectada a UTM Zona 28N (Canarias)."""
-    tree = ET.parse(archivo_gpx)
-    root = tree.getroot()
-    puntos = []
-    
-    for elem in root.iter():
-        if elem.tag.endswith('trkpt'):
-            lat = float(elem.attrib['lat'])
-            lon = float(elem.attrib['lon'])
-            puntos.append((lon, lat))
-            
+def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
     if len(puntos) < 3:
         return None, "Error: GPX con puntos insuficientes"
         
@@ -86,11 +78,61 @@ def procesar_gpx_subido(archivo_gpx, max_dist_cierre_m=100.0, franja_m=30.0):
         
     return geom_conquista, tipo
 
+def extraer_puntos_gpx(archivo_gpx):
+    tree = ET.parse(archivo_gpx)
+    root = tree.getroot()
+    puntos = []
+    for elem in root.iter():
+        if elem.tag.endswith('trkpt'):
+            lat = float(elem.attrib['lat'])
+            lon = float(elem.attrib['lon'])
+            puntos.append((lon, lat))
+    return puntos
+
+def cargar_actividades_persistentes():
+    if not os.path.exists(DATA_FILE):
+        return []
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        actividades = []
+        for item in data:
+            puntos = item.get("puntos", [])
+            fecha = datetime.strptime(item["fecha"], "%Y-%m-%d %H:%M")
+            if puntos:
+                geom, tipo = procesar_puntos_gpx(puntos)
+                if geom is not None:
+                    actividades.append({
+                        'alumno': item['alumno'],
+                        'fecha': fecha,
+                        'geometria_utm': geom,
+                        'tipo': tipo,
+                        'archivo': item.get('archivo', 'actividad.gpx'),
+                        'puntos': puntos
+                    })
+        actividades.sort(key=lambda x: x['fecha'])
+        return actividades
+    except Exception as e:
+        st.error(f"Error cargando archivo de persistencia: {e}")
+        return []
+
+def guardar_actividades_persistentes(actividades):
+    data = []
+    for act in actividades:
+        data.append({
+            'alumno': act['alumno'],
+            'fecha': act['fecha'].strftime("%Y-%m-%d %H:%M"),
+            'archivo': act.get('archivo', 'actividad.gpx'),
+            'puntos': act.get('puntos', [])
+        })
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 # -----------------------------------------------------------------------------
 # 4. ESTADO DE LA SESIÓN Y COLORES
 # -----------------------------------------------------------------------------
 if 'actividades' not in st.session_state:
-    st.session_state.actividades = []
+    st.session_state.actividades = cargar_actividades_persistentes()
 
 COLORES_ALUMNOS = [
     "#FF3333", "#3388FF", "#28A745", "#FFC107", "#9C27B0",
@@ -98,7 +140,7 @@ COLORES_ALUMNOS = [
 ]
 
 # -----------------------------------------------------------------------------
-# 5. PANEL LATERAL: CARGA DE RUTAS
+# 5. PANEL LATERAL: CARGA DE RUTAS Y GESTIÓN
 # -----------------------------------------------------------------------------
 st.sidebar.header("📤 Panel del Docente: Cargar GPX")
 
@@ -110,7 +152,8 @@ archivo_gpx = st.sidebar.file_uploader("Subir archivo .gpx", type=["gpx"])
 if st.sidebar.button("➕ Registrar Ruta y Actualizar Cantones"):
     if archivo_gpx is not None and nombre_alumno.strip():
         fecha_completa = datetime.combine(fecha_ruta, hora_ruta)
-        geom, tipo = procesar_gpx_subido(archivo_gpx)
+        puntos = extraer_puntos_gpx(archivo_gpx)
+        geom, tipo = procesar_puntos_gpx(puntos)
         
         if geom is not None:
             st.session_state.actividades.append({
@@ -118,14 +161,25 @@ if st.sidebar.button("➕ Registrar Ruta y Actualizar Cantones"):
                 'fecha': fecha_completa,
                 'geometria_utm': geom,
                 'tipo': tipo,
-                'archivo': archivo_gpx.name
+                'archivo': archivo_gpx.name,
+                'puntos': puntos
             })
             st.session_state.actividades.sort(key=lambda x: x['fecha'])
-            st.sidebar.success(f"¡Ruta de {nombre_alumno} registrada con éxito ({tipo})!")
+            guardar_actividades_persistentes(st.session_state.actividades)
+            st.sidebar.success(f"¡Ruta de {nombre_alumno} registrada y GUARDADA ({tipo})!")
         else:
             st.sidebar.error("El archivo GPX no contiene datos de track válidos.")
     else:
         st.sidebar.warning("Introduce el nombre del alumno y selecciona un archivo GPX.")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("⚙️ Gestión de Datos")
+if st.sidebar.button("🗑️ Borrar Todos los Datos / Reiniciar"):
+    st.session_state.actividades = []
+    if os.path.exists(DATA_FILE):
+        os.remove(DATA_FILE)
+    st.sidebar.success("¡Se han borrado todos los datos guardados!")
+    st.rerun()
 
 # -----------------------------------------------------------------------------
 # 6. CÁLCULO DE SOLAPAMIENTO Y RE-CONQUISTA POR CANTÓN
@@ -148,7 +202,6 @@ def calcular_dominios_actuales():
     return dominios
 
 def calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf):
-    """Calcula la superficie que cada alumno posee dentro de cada cantón."""
     cantones_utm = cantones_gdf.to_crs("EPSG:32628")
     filas = []
     
@@ -182,7 +235,7 @@ alumnos_unicos = list(set([act['alumno'] for act in st.session_state.actividades
 mapa_colores = {al: COLORES_ALUMNOS[i % len(COLORES_ALUMNOS)] for i, al in enumerate(alumnos_unicos)}
 
 # -----------------------------------------------------------------------------
-# 7. INTERFAZ WEB PRINCIPAL (4 PESTAÑAS)
+# 7. INTERFAZ WEB PRINCIPAL
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
     "🗺️ Mapa de la Conquista",
