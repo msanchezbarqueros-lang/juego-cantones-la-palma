@@ -10,160 +10,106 @@ import geopandas as gpd
 import pandas as pd
 
 # -----------------------------------------------------------------------------
-# 1. CONFIGURACIÓN DE PÁGINA Y ESTILO "RUN AN EMPIRE"
+# 1. CONFIGURACIÓN DE PÁGINA Y ESTILO OSCURO "RUN AN EMPIRE"
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="La Conquista de los Cantones - OHI La Palma",
+    page_title="La Conquista de los Cantones - La Palma",
     page_icon="👑",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# Inyección de CSS personalizado para emular la estética de "Run An Empire"
-RUN_AN_EMPIRE_CSS = """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Oswald:wght@500;700&family=Rajdhani:wght@600;700&display=swap');
-
-/* Fondo oscuro general tipo juego de estrategia */
-.stApp {
-    background-color: #0B0E14;
-    color: #E2E8F0;
-    font-family: 'Rajdhani', sans-serif;
-}
-
-/* Encabezado principal tipo Bánner Imperial */
-.empire-header {
-    background: linear-gradient(135deg, #1F190A 0%, #3D2D0C 50%, #171105 100%);
-    border: 2px solid #D4AF37;
-    border-radius: 12px;
-    padding: 24px;
-    text-align: center;
-    margin-bottom: 25px;
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25), inset 0 0 15px rgba(212, 175, 55, 0.1);
-}
-
-.empire-title {
-    font-family: 'Cinzel', serif;
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: #FFD700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 2px 2px 4px #000000;
-    margin: 0;
-}
-
-.empire-subtitle {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.1rem;
-    color: #E5C158;
-    letter-spacing: 1.5px;
-    margin-top: 8px;
-    text-transform: uppercase;
-}
-
-/* Tarjetas y Métricas estilo Panel de Control Estratégico */
-div[data-testid="stMetric"] {
-    background: linear-gradient(180deg, #18202C 0%, #0F151F 100%);
-    border: 1px solid #D4AF37;
-    border-radius: 10px;
-    padding: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-}
-
-div[data-testid="stMetricLabel"] {
-    color: #FFD700 !important;
-    font-family: 'Oswald', sans-serif !important;
-    font-size: 1rem !important;
-    text-transform: uppercase;
-}
-
-div[data-testid="stMetricValue"] {
-    color: #FFFFFF !important;
-    font-family: 'Cinzel', serif !important;
-    font-weight: 700 !important;
-}
-
-/* Botones con estilo dorado de Acción */
-.stButton>button {
-    background: linear-gradient(180deg, #D4AF37 0%, #AA820A 100%) !important;
-    color: #000000 !important;
-    font-family: 'Oswald', sans-serif !important;
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    border: 1px solid #FFE57F !important;
-    border-radius: 6px !important;
-    padding: 8px 16px !important;
-    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3) !important;
-    transition: all 0.2s ease-in-out !important;
-}
-
-.stButton>button:hover {
-    background: linear-gradient(180deg, #FFE57F 0%, #D4AF37 100%) !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7) !important;
-    transform: translateY(-2px);
-}
-
-/* Pestañas estilizadas */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-    background-color: #121721;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #2A3548;
-}
-
-.stTabs [data-baseweb="tab"] {
-    font-family: 'Oswald', sans-serif !important;
-    font-size: 1rem !important;
-    text-transform: uppercase;
-    color: #A0AEC0 !important;
-    border-radius: 6px;
-    padding: 8px 16px;
-}
-
-.stTabs [aria-selected="true"] {
-    background-color: #2A3548 !important;
-    color: #FFD700 !important;
-    border: 1px solid #D4AF37 !important;
-    font-weight: bold;
-}
-
-/* Estilo para las tablas */
-.dataframe {
-    background-color: #121721 !important;
-    color: #F7FAFC !important;
-    border: 1px solid #2A3548 !important;
-}
-
-/* Ajustes de la barra lateral */
-section[data-testid="stSidebar"] {
-    background-color: #0E131D !important;
-    border-right: 1px solid #2A3548;
-}
-</style>
-"""
-
-st.markdown(RUN_AN_EMPIRE_CSS, unsafe_allow_html=True)
-
-# Bánner Superior Principal
+# Estilo CSS Oscuro Estilo Videojuego de Estrategia
 st.markdown("""
-<div class="empire-header">
-    <div class="empire-title">⚔️ LA CONQUISTA DE LOS CANTONES ⚔️</div>
-    <div class="empire-subtitle">Estrategia Territorial Benahoarita • Isla de La Palma</div>
+<style>
+    /* Fondo principal y textos */
+    .stApp {
+        background-color: #0d1117;
+        color: #c9d1d9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Encabezado Épico */
+    .header-box {
+        background: linear-gradient(135deg, #161b22 0%, #21262d 100%);
+        border: 2px solid #ffd700;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 25px;
+        box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.2);
+    }
+    .header-title {
+        color: #ffd700;
+        font-size: 2.2rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 0;
+        text-shadow: 2px 2px 4px #000000;
+    }
+    .header-subtitle {
+        color: #8b949e;
+        font-size: 1rem;
+        margin-top: 5px;
+    }
+
+    /* Tarjetas de Métricas (Menceyes) */
+    div[data-testid="stMetric"] {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-left: 4px solid #ffd700;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #ffd700 !important;
+        font-weight: bold;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+
+    /* Pestañas */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #161b22;
+        padding: 8px;
+        border-radius: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #21262d;
+        color: #8b949e;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #ffd700 !important;
+        color: #0d1117 !important;
+    }
+    
+    /* Barra lateral */
+    section[data-testid="stSidebar"] {
+        background-color: #161b22;
+        border-right: 1px solid #30363d;
+    }
+</style>
+
+<div class="header-box">
+    <div class="header-title">🌋 LA CONQUISTA DE LOS CANTONES</div>
+    <div class="header-subtitle">Estrategia Territorial Benahoarita | Módulo OHI - La Palma</div>
 </div>
 """, unsafe_allow_html=True)
 
 DATA_FILE = "actividades.json"
-PASSWORD_DOCENTE = "ohi2026"  # Contraseña para el modo profesor
+PASSWORD_DOCENTE = "ohi2026"  # Contraseña del docente
 
 # -----------------------------------------------------------------------------
-# 2. CARGA DE CANTONES CON GEOJSON
+# 2. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
 # -----------------------------------------------------------------------------
 @st.cache_data
 def cargar_cantones_la_palma():
+    """Carga los 12 cantones desde el GeoJSON o genera las geometrías base."""
     try:
         gdf = gpd.read_file("cantones_la_palma.geojson")
         return gdf
@@ -185,7 +131,7 @@ def cargar_cantones_la_palma():
         return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
 
 # -----------------------------------------------------------------------------
-# 3. PROCESAMIENTO GPX Y PERSISTENCIA DE DATOS
+# 3. PROCESAMIENTO DE GPX Y PERSISTENCIA DE DATOS
 # -----------------------------------------------------------------------------
 def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
     if len(puntos) < 3:
@@ -261,37 +207,34 @@ def guardar_actividades_persistentes(actividades):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 # -----------------------------------------------------------------------------
-# 4. PALETA DE COLORES ÉPICA / NEÓN TIPO "RUN AN EMPIRE"
+# 4. ESTADO DE LA SESIÓN Y PALETA DE COLORES NEÓN DE GUERRA
 # -----------------------------------------------------------------------------
 if 'actividades' not in st.session_state:
     st.session_state.actividades = cargar_actividades_persistentes()
 
-# Colores de alta visibilidad tipo videojuegos sobre mapa oscuro
-COLORES_IMPERIALES = [
-    "#FF0055", "#00F0FF", "#39FF14", "#FFB703", "#9D4EDD",
-    "#FF6B00", "#00E5FF", "#F72585", "#70E000", "#FF4800"
+COLORES_NEON = [
+    "#FF0055", "#00E5FF", "#00FF66", "#FFCC00", "#AA00FF",
+    "#FF6600", "#00FFCC", "#FF00AA", "#76FF03", "#D500F9"
 ]
 
 # -----------------------------------------------------------------------------
-# 5. BARRA LATERAL CON MODO DOCENTE PROTEGIDO
+# 5. BARRA LATERAL CON CONTROL DE ACCESO (PASSWORD)
 # -----------------------------------------------------------------------------
-st.sidebar.markdown("<h2 style='color:#FFD700; font-family:Cinzel;'>🛡️ CENTRO DE MANDO</h2>", unsafe_allow_html=True)
+st.sidebar.title("⚔️ PANEL DE CONTROL")
 
-pwd_input = st.sidebar.text_input("🔑 Contraseña Docente", type="password", help="Acceso de administración")
+pwd_input = st.sidebar.text_input("🔑 Contraseña Docente", type="password", help="Acceso restringido para el profesorado.")
 
-es_docente = (pwd_input == PASSWORD_DOCENTE)
-
-if es_docente:
-    st.sidebar.success("🔓 MODO PROFESOR ACTIVO")
+if pwd_input == PASSWORD_DOCENTE:
+    st.sidebar.success("🔓 Modo Docente Activo")
     st.sidebar.markdown("---")
-    st.sidebar.markdown("<h3 style='color:#FFD700; font-family:Oswald;'>📤 REGISTRAR NUEVA INCURSIÓN GPX</h3>", unsafe_allow_html=True)
+    st.sidebar.subheader("📤 Cargar Ruta GPX")
     
-    nombre_alumno = st.sidebar.text_input("Nombre del Guerrero/a (Alumno/a)", value="Guerrero 1")
-    fecha_ruta = st.sidebar.date_input("Fecha de la Incursión", value=datetime.now())
-    hora_ruta = st.sidebar.time_input("Hora de Inicio", value=datetime.now().time())
-    archivo_gpx = st.sidebar.file_uploader("Cargar pergamino .GPX", type=["gpx"])
+    nombre_alumno = st.sidebar.text_input("Nombre del Alumno/a", value="Alumno 1")
+    fecha_ruta = st.sidebar.date_input("Fecha de la Ruta", value=datetime.now())
+    hora_ruta = st.sidebar.time_input("Hora de la Ruta", value=datetime.now().time())
+    archivo_gpx = st.sidebar.file_uploader("Subir archivo .gpx", type=["gpx"])
     
-    if st.sidebar.button("⚔️ CONQUISTAR TERRITORIO"):
+    if st.sidebar.button("⚡ CONQUISTAR TERRITORIO"):
         if archivo_gpx is not None and nombre_alumno.strip():
             fecha_completa = datetime.combine(fecha_ruta, hora_ruta)
             puntos = extraer_puntos_gpx(archivo_gpx)
@@ -308,26 +251,26 @@ if es_docente:
                 })
                 st.session_state.actividades.sort(key=lambda x: x['fecha'])
                 guardar_actividades_persistentes(st.session_state.actividades)
-                st.sidebar.success(f"¡Territorio de {nombre_alumno} anexado al Imperio!")
+                st.sidebar.success(f"¡Territorio de {nombre_alumno} registrado!")
                 st.rerun()
             else:
-                st.sidebar.error("El archivo GPX no contiene datos válidos.")
+                st.sidebar.error("Archivo GPX sin datos válidos.")
         else:
-            st.sidebar.warning("Indica el nombre y adjunta el archivo GPX.")
+            st.sidebar.warning("Rellena el nombre y selecciona el GPX.")
             
     st.sidebar.markdown("---")
-    st.sidebar.markdown("<h4 style='color:#E53E3E;'>⚠️ ZONA DE REINICIO</h4>", unsafe_allow_html=True)
-    if st.sidebar.button("💥 REINICIAR TODA LA COMPETICIÓN"):
+    if st.sidebar.button("🗑️ Reiniciar Campaña (Borrar Todo)"):
         st.session_state.actividades = []
         if os.path.exists(DATA_FILE):
             os.remove(DATA_FILE)
-        st.sidebar.success("¡El mapa ha sido reseteado por completo!")
+        st.sidebar.success("¡Campaña reiniciada!")
         st.rerun()
+
 else:
-    st.sidebar.info("👁️ **MODO ESTUDIANTE (Solo Lectura)**\n\nNavega por el mapa, consulta el estado de tus reinos y revisa quién domina cada cantón.")
+    st.sidebar.info("👁️ **Modo Estudiante (Solo Lectura)**\n\nConsulta el mapa de dominio y las tablas de clasificación en tiempo real.")
 
 # -----------------------------------------------------------------------------
-# 6. CÁLCULO DE SOLAPAMIENTO Y RE-CONQUISTA
+# 6. CÁLCULO DE SOLAPAMIENTOS Y COBERTURA POR CANTÓN
 # -----------------------------------------------------------------------------
 def calcular_dominios_actuales():
     dominios = {}
@@ -366,10 +309,10 @@ def calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf):
                 pct = (area_m2 / area_total_canton) * 100
                 filas.append({
                     "Cantón": nombre_canton,
-                    "Guerrero/a": alumno,
+                    "Alumno/a": alumno,
                     "Superficie (m²)": round(area_m2, 2),
                     "Hectáreas (ha)": round(area_m2 / 10000.0, 2),
-                    "% del Cantón": round(pct, 2)
+                    "% Conquistado del Cantón": round(pct, 2)
                 })
                 
     return pd.DataFrame(filas)
@@ -377,92 +320,91 @@ def calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf):
 dominios_utm = calcular_dominios_actuales()
 cantones_gdf = cargar_cantones_la_palma()
 alumnos_unicos = list(set([act['alumno'] for act in st.session_state.actividades]))
-mapa_colores = {al: COLORES_IMPERIALES[i % len(COLORES_IMPERIALES)] for i, al in enumerate(alumnos_unicos)}
+mapa_colores = {al: COLORES_NEON[i % len(COLORES_NEON)] for i, al in enumerate(alumnos_unicos)}
 
 # -----------------------------------------------------------------------------
-# 7. INTERFAZ PRINCIPAL CON TEMA DE JUEGO
+# 7. INTERFAZ WEB PRINCIPAL (PESTAÑAS ESTILIZADAS)
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
     "🗺️ MAPA DE DOMINIO",
     "🏆 CLASIFICACIÓN GENERAL",
-    "👑 MENCEYES DE CANTÓN",
+    "👑 MENCEYES POR CANTÓN",
     "📜 LIBRO DE GUERRA"
 ])
 
 with tab1:
-    st.markdown("<h3 style='color:#FFD700; font-family:Oswald;'>🗺️ ESTADO DEL TERRITORIO BENAHOARITA</h3>", unsafe_allow_html=True)
+    st.write("### 📍 Mapa Táctico de La Palma")
     
-    # Mapa base con estilo oscuro "CartoDB dark_matter" tipo Run An Empire
+    # MAPA CON MOSAICO OSCURO GRATUITO Y PÚBLICO (SIN NECESIDAD DE API KEY)
     m = folium.Map(
         location=[28.65, -17.86],
         zoom_start=11,
-        tiles="CartoDB dark_matter",
-        attr="CartoDB Dark Matter"
+        tiles="https://{s}.[enlace sospechoso eliminado]{z}/{x}/{y}{r}.png",
+        attr='&copy; <a href="[suspicious link removed]">OpenStreetMap</a> contributors &copy; <a href="[suspicious link removed]">CARTO</a>'
     )
     
-    # Capa de Cantones Históricos
+    # Capa de Cantones Benahoaritas
     for _, row in cantones_gdf.iterrows():
         folium.GeoJson(
             sg.mapping(row['geometry']),
             style_function=lambda x: {
-                'fillColor': '#2A3548',
-                'color': '#FFD700',
-                'weight': 1.2,
-                'fillOpacity': 0.15,
+                'fillColor': '#21262d',
+                'color': '#ffd700',
+                'weight': 1.5,
+                'fillOpacity': 0.25,
                 'dashArray': '4, 4'
             },
-            tooltip=f"<b>🏛️ CANTÓN:</b> {row['canton']}<br><b>📍 ZONA:</b> {row.get('municipio', 'N/A')}"
+            tooltip=f"<b>🏛️ Cantón:</b> {row['canton']}<br><b>Territorio:</b> {row.get('municipio', 'N/A')}"
         ).add_to(m)
         
-    # Capa de Dominios de Alumnos
+    # Capa de Dominios Neón de los Estudiantes
     for alumno, geom in dominios_utm.items():
-        if geom is not None and not geom.is_empty:
+        if geom is not None and not [enlace sospechoso eliminado]_empty:
             gdf_m = gpd.GeoDataFrame(geometry=[geom], crs="EPSG:32628").to_crs("EPSG:4326")
             geom_wgs = gdf_m.geometry.iloc[0]
             area_m2 = geom.area
-            color = mapa_colores.get(alumno, "#FF0055")
+            color = mapa_colores.get(alumno, "#00E5FF")
             
             folium.GeoJson(
                 sg.mapping(geom_wgs),
                 style_function=lambda x, col=color: {
                     'fillColor': col,
-                    'color': '#FFFFFF',
-                    'weight': 2,
-                    'fillOpacity': 0.75
+                    'color': col,
+                    'weight': 2.5,
+                    'fillOpacity': 0.65
                 },
-                tooltip=f"<b>👑 CONQUISTADOR:</b> {alumno}<br><b>🏰 TERRITORIO:</b> {round(area_m2/10000, 2)} ha ({round(area_m2/1000000, 3)} km²)"
+                tooltip=f"<b>👑 Conquistador:</b> {alumno}<br><b>Dominio:</b> {round(area_m2/10000, 2)} ha ({round(area_m2/1000000, 3)} km²)"
             ).add_to(m)
             
     components.html(m._repr_html_(), height=650)
 
 with tab2:
-    st.markdown("<h3 style='color:#FFD700; font-family:Oswald;'>🏆 SALÓN DE LA FAMA IMPERIAL</h3>", unsafe_allow_html=True)
-    
+    st.write("### 🏆 Ranking General de la Isla")
     ranking_data = []
     for alumno, geom in dominios_utm.items():
-        area_m2 = geom.area if (geom is not None and not geom.is_empty) else 0.0
+        area_m2 = geom.area if (geom is not None and not [enlace sospechoso eliminado]_empty) else 0.0
         ranking_data.append({
-            "Guerrero/a": alumno,
-            "Dominio (km²)": round(area_m2 / 1_000_000.0, 4),
-            "Hectáreas (ha)": round(area_m2 / 10_000.0, 2),
+            "Alumno/a": alumno,
+            "Superficie (km²)": round(area_m2 / 1_000_000.0, 4),
+            "Superficie (Hectáreas)": round(area_m2 / 10_000.0, 2),
             "Superficie (m²)": round(area_m2, 2)
         })
         
     if ranking_data:
         df_ranking = pd.DataFrame(ranking_data).sort_values(by="Superficie (m²)", ascending=False)
-        df_ranking.index = [f"Puesto {i+1}" for i in range(len(df_ranking))]
-        st.dataframe(df_ranking[["Guerrero/a", "Dominio (km²)", "Hectáreas (ha)", "Superficie (m²)"]], use_container_width=True)
+        df_ranking.index = range(1, len(df_ranking) + 1)
+        st.dataframe(df_ranking[["Alumno/a", "Superficie (km²)", "Superficie (Hectáreas)", "Superficie (m²)"]], use_container_width=True)
     else:
-        st.info("Aún no se han registrado incursiones en la isla. El docente debe subir los primeros archivos GPX.")
+        [enlace sospechoso eliminado]("Aún no se han librado batallas por el territorio. El docente debe registrar las primeras rutas GPX.")
 
 with tab3:
-    st.markdown("<h3 style='color:#FFD700; font-family:Oswald;'>👑 TRONO DE LOS 12 CANTONES</h3>", unsafe_allow_html=True)
-    
+    st.write("### 👑 Menceyes y Señoríos por Cantón")
     df_cantones = calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf)
     
     if not df_cantones.empty:
         cantones_conquistados = df_cantones["Cantón"].unique()
         
+        st.write("#### 🤴 Menceyes Actuales")
         cols = st.columns(3)
         for i, cant in enumerate(cantones_conquistados):
             df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(by="Superficie (m²)", ascending=False)
@@ -470,33 +412,34 @@ with tab3:
             
             with cols[i % 3]:
                 st.metric(
-                    label=f"🏛️ CANTÓN {cant.upper()}",
-                    value=f"👑 {lider['Guerrero/a']}",
-                    delta=f"{lider['Hectáreas (ha)']} ha ({lider['% del Cantón']}% controlado)"
+                    label=f"🏛️ {cant}",
+                    value=f"👑 {lider['Alumno/a']}",
+                    delta=f"{lider['Hectáreas (ha)']} ha ({lider['% Conquistado del Cantón']}% del cantón)"
                 )
                 
         st.markdown("---")
-        canton_sel = st.selectbox("🔎 Explorar Cantón:", cantones_conquistados)
+        
+        canton_sel = st.selectbox("🔎 Inspeccionar Cantón:", cantones_conquistados)
         df_canton_especifico = df_cantones[df_cantones["Cantón"] == canton_sel].sort_values(by="Superficie (m²)", ascending=False)
         df_canton_especifico.index = range(1, len(df_canton_especifico) + 1)
         
+        st.write(f"### Disputa Territorial en **{canton_sel}**")
         st.dataframe(
-            df_canton_especifico[["Guerrero/a", "Hectáreas (ha)", "% del Cantón", "Superficie (m²)"]],
+            df_canton_especifico[["Alumno/a", "Hectáreas (ha)", "% Conquistado del Cantón", "Superficie (m²)"]],
             use_container_width=True
         )
     else:
-        st.info("Sin conquistas registradas en los cantones.")
+        [enlace sospechoso eliminado]("Ningún cantón ha sido conquistado todavía.")
 
 with tab4:
-    st.markdown("<h3 style='color:#FFD700; font-family:Oswald;'>📜 REGISTRO CRONOLÓGICO DE INCURSIONES</h3>", unsafe_allow_html=True)
-    
+    st.write("### 📜 Libro de Guerra y Registro de Incursiones")
     if st.session_state.actividades:
         historial = [{
             "Fecha/Hora": act['fecha'].strftime("%Y-%m-%d %H:%M"),
-            "Guerrero/a": act['alumno'],
+            "Conquistador/a": act['alumno'],
             "Tipo de Incursión": act['tipo'],
-            "Pergamino GPX": act['archivo']
+            "Archivo GPX": act['archivo']
         } for act in st.session_state.actividades]
         st.table(pd.DataFrame(historial))
     else:
-        st.info("El libro de guerra está vacío.")
+        [enlace sospechoso eliminado]("El historial está limpio.")
