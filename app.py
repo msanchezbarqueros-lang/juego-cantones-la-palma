@@ -302,7 +302,7 @@ PASSWORD_DOCENTE = "ohi2026"
 # BASE DE DATOS DE LOS 11 ALUMNOS CON ESCUDOS Y COLORES ASIGNADOS
 # -----------------------------------------------------------------------------
 ALUMNOS_PERFILES = {
-    "Estrella": {"escudo": "⭐", "nombre_escudo": "Estrella de Mar", "color": "#FF0055"},
+    "Estrella": {"escudo": "⭐", "nombre_escudo": "Estrella de Cima", "color": "#FF0055"},
     "Yassine":  {"escudo": "🦅", "nombre_escudo": "Águila de Cumbre", "color": "#00E5FF"},
     "Fabián":   {"escudo": "⚔️", "nombre_escudo": "Lanzas Cruzadas", "color": "#00FF66"},
     "Claudia":  {"escudo": "👑", "nombre_escudo": "Corona de Mencey", "color": "#FFCC00"},
