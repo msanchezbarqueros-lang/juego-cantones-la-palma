@@ -325,7 +325,7 @@ with tab1:
     st.write("### 📍 Mapa Interactivo de La Palma")
     
     # MAPA ILUSTRADO "TIPO DIBUJO/ATLAS" CON CARTODB VOYAGER
-    # - min_zoom=11: Impide alejar el zoom más allá de la Isla de La Palma
+    # - min_zoom=15: Impide alejar el zoom más allá de la Isla de La Palma
     # - max_bounds=True y limites de coordenadas para centrar exclusivamente La Palma
     m = folium.Map(
         location=[28.65, -17.86],
