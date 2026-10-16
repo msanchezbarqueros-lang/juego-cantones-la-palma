@@ -1,7 +1,4 @@
-import sys
-import py_compile
-
-app_code = """import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 from datetime import datetime
 import json
 import os
@@ -13,7 +10,7 @@ import geopandas as gpd
 import pandas as pd
 
 # -----------------------------------------------------------------------------
-# 1. CONFIGURACIÓN DE PÁGINA Y ESTILO OSCURO "RUN AN EMPIRE"
+# 1. CONFIGURACIÓN DE PÁGINA Y ESTILO OSCURO
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="La Conquista de los Cantones - La Palma",
@@ -22,17 +19,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Estilo CSS Oscuro de Alto Contraste para Máxima Legibilidad
-st.markdown(\"\"\"
+# Estilo CSS Oscuro de Alto Contraste
+st.markdown("""
 <style>
-    /* Fondo principal y textos generales */
+    /* Fondo principal y textos */
     .stApp {
         background-color: #0d1117;
         color: #ffffff;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Encabezado Épico */
+    /* Encabezado */
     .header-box {
         background: linear-gradient(135deg, #161b22 0%, #21262d 100%);
         border: 2px solid #ffd700;
@@ -52,17 +49,16 @@ st.markdown(\"\"\"
         text-shadow: 2px 2px 4px #000000;
     }
     .header-subtitle {
-        color: #e6edf3;
-        font-size: 1.05rem;
-        margin-top: 6px;
-        font-weight: 500;
+        color: #c9d1d9;
+        font-size: 1rem;
+        margin-top: 5px;
     }
 
-    /* Tarjetas de Métricas (Menceyes) */
+    /* Tarjetas de Métricas */
     div[data-testid="stMetric"] {
         background-color: #161b22;
-        border: 1px solid #ffd700;
-        border-left: 5px solid #ffd700;
+        border: 1px solid #30363d;
+        border-left: 4px solid #ffd700;
         border-radius: 8px;
         padding: 12px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
@@ -70,165 +66,57 @@ st.markdown(\"\"\"
     div[data-testid="stMetricLabel"] {
         color: #ffd700 !important;
         font-weight: bold !important;
-        font-size: 1.1rem !important;
     }
     div[data-testid="stMetricValue"] {
         color: #ffffff !important;
         font-weight: bold !important;
     }
 
-    /* Pestañas de Navegación */
+    /* Pestañas */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
         background-color: #161b22;
         padding: 8px;
         border-radius: 8px;
-        border: 1px solid #30363d;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #21262d;
         color: #ffffff !important;
         border-radius: 6px;
         font-weight: bold !important;
-        font-size: 1rem !important;
-        border: 1px solid #484f58;
+        font-size: 1.05rem !important;
     }
     .stTabs [aria-selected="true"] {
         background-color: #ffd700 !important;
         color: #0d1117 !important;
-        font-weight: 900 !important;
     }
     
-    /* Barra lateral */
+    /* Barra lateral y Controles */
     section[data-testid="stSidebar"] {
-        background-color: #161b22 !important;
-        border-right: 2px solid #ffd700 !important;
+        background-color: #161b22;
+        border-right: 1px solid #30363d;
     }
-
-    /* MÁXIMA VISIBILIDAD Y CONTRASTE EN INPUTS DE FECHA, HORA, TEXTO Y FILE UPLOADER */
-    section[data-testid="stSidebar"] label, 
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] span,
-    div[data-testid="stForm"] label,
-    label[data-testid="stWidgetLabel"] p {
-        color: #ffd700 !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
+    
+    /* Etiquetas y Contraste de Inputs */
+    label, .stMarkdown, p, span, h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
     }
-
-    /* Cajas de texto, contraseña, valores e indicadores de fecha y hora */
-    div[data-baseweb="input"], 
-    div[data-baseweb="base-input"],
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    div[data-testid="stDateInput"] input,
-    div[data-testid="stTimeInput"] input {
+    
+    .stTextInput input, .stDateInput input, .stTimeInput input, .stSelectbox div {
+        color: #ffffff !important;
         background-color: #0d1117 !important;
-        color: #ffffff !important;
-        border: 2px solid #ffd700 !important;
-        border-radius: 6px !important;
-        font-weight: bold !important;
-        font-size: 1.1rem !important;
-    }
-
-    /* Textos, fechas y horas visibles dentro de los controles de DateInput y TimeInput */
-    div[data-testid="stDateInput"] div,
-    div[data-testid="stTimeInput"] div,
-    div[data-testid="stDateInput"] span,
-    div[data-testid="stTimeInput"] span,
-    div[data-testid="stDateInput"] p,
-    div[data-testid="stTimeInput"] p,
-    div[data-baseweb="input"] div,
-    div[data-baseweb="input"] span {
-        color: #ffffff !important;
+        border: 1px solid #ffd700 !important;
         font-weight: bold !important;
     }
-
-    /* Iconos dentro de inputs (calendario, reloj, candado) */
-    div[data-testid="stDateInput"] svg,
-    div[data-testid="stTimeInput"] svg,
-    div[data-baseweb="input"] svg {
-        fill: #ffd700 !important;
-        color: #ffd700 !important;
-    }
-
-    /* Desplegable Selectbox */
-    div[data-baseweb="select"] > div {
-        background-color: #0d1117 !important;
-        color: #ffffff !important;
-        border: 2px solid #ffd700 !important;
-        border-radius: 6px !important;
-        font-weight: bold !important;
-    }
-    div[data-baseweb="select"] span,
-    div[data-baseweb="select"] p {
-        color: #ffffff !important;
-        font-weight: bold !important;
-    }
-
-    /* File Uploader (Subir archivo .gpx) - Alto Contraste */
+    
     div[data-testid="stFileUploader"] {
-        background-color: #0d1117 !important;
         border: 2px dashed #ffd700 !important;
-        border-radius: 8px !important;
-        padding: 15px !important;
+        border-radius: 10px;
+        padding: 15px;
+        background-color: #0d1117 !important;
     }
-    div[data-testid="stFileUploader"] section {
-        background-color: #161b22 !important;
-    }
-    div[data-testid="stFileUploader"] label,
-    div[data-testid="stFileUploader"] label p {
-        color: #ffd700 !important;
-        font-size: 1.15rem !important;
-        font-weight: 800 !important;
-    }
-    div[data-testid="stFileUploader"] span,
-    div[data-testid="stFileUploader"] small,
-    div[data-testid="stFileUploader"] div,
-    div[data-testid="stFileUploader"] p,
-    [data-testid="stFileUploaderDropzoneInstructions"] div,
-    [data-testid="stFileUploaderDropzoneInstructions"] span,
-    [data-testid="stFileUploaderDropzoneInstructions"] small {
+    div[data-testid="stFileUploader"] * {
         color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-    }
-    div[data-testid="stFileUploader"] button {
-        background-color: #ffd700 !important;
-        color: #0d1117 !important;
-        font-weight: bold !important;
-        border: none !important;
-    }
-
-    /* Menús emergentes de Date/Time picker y Selectbox */
-    ul[data-baseweb="menu"], 
-    div[data-baseweb="popover"],
-    div[data-baseweb="calendar"] {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        border: 2px solid #ffd700 !important;
-    }
-    div[data-baseweb="calendar"] button {
-        color: #ffffff !important;
-    }
-
-    /* Botones primarios */
-    .stButton > button {
-        background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%) !important;
-        color: #0d1117 !important;
-        font-weight: 800 !important;
-        font-size: 1rem !important;
-        border: none !important;
-        border-radius: 6px !important;
-        padding: 10px 20px !important;
-        box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3) !important;
-    }
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #ffffff 0%, #ffd700 100%) !important;
-        color: #0d1117 !important;
-        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.5) !important;
     }
 </style>
 
@@ -236,87 +124,80 @@ st.markdown(\"\"\"
     <div class="header-title">🌋 LA CONQUISTA DE LOS CANTONES</div>
     <div class="header-subtitle">Estrategia Territorial Benahoarita | Módulo OHI - La Palma</div>
 </div>
-\"\"\", unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# TIMER DINÁMICO EN TIEMPO REAL (JS CLIENTE)
+# 2. TEMPORIZADOR DINÁMICO EN TIEMPO REAL (HASTA EL 30 DE MAYO 23:59)
 # -----------------------------------------------------------------------------
-components.html(\"\"\"
-<div id="countdown-box" style="
-    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+components.html("""
+<div style="
+    background-color: #161b22;
     border: 2px solid #ffd700;
     border-radius: 10px;
-    padding: 12px 20px;
+    padding: 12px;
     text-align: center;
-    color: #ffffff;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
-    margin-bottom: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 ">
-    <div style="color: #ffd700; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px;">
-        ⏰ TIEMPO RESTANTE PARA ENVIAR RUTAS GPX (Cierre: 30 de Mayo de 2026 - 23:59)
+    <div style="color: #ffd700; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">
+        ⏰ TIEMPO RESTANTE PARA ENVIAR RUTA GPX (Cierre: 30 de Mayo - 23:59)
     </div>
-    <div id="timer-display" style="
-        font-size: 1.8rem;
-        font-weight: 900;
-        color: #ffffff;
-        margin-top: 6px;
-        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    ">
+    <div id="countdown" style="color: #ffffff; font-size: 1.8rem; font-weight: 800; margin-top: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
         Cargando cuenta atrás...
     </div>
 </div>
 
 <script>
-function updateTimer() {
     const targetDate = new Date("2026-05-30T23:59:59").getTime();
-    const now = new Date().getTime();
-    const difference = targetDate - now;
-
-    const display = document.getElementById("timer-display");
-
-    if (difference <= 0) {
-        display.innerHTML = "<span style='color: #ff3333;'>🛑 CAMPAÑA FINALIZADA</span>";
-        return;
+    
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const difference = targetDate - now;
+        
+        if (difference < 0) {
+            document.getElementById("countdown").innerHTML = "🛑 CAMPAÑA FINALIZADA";
+            return;
+        }
+        
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        
+        document.getElementById("countdown").innerHTML = 
+            "⏳ " + days + "d : " + 
+            (hours < 10 ? "0" : "") + hours + "h : " + 
+            (minutes < 10 ? "0" : "") + minutes + "m : " + 
+            (seconds < 10 ? "0" : "") + seconds + "s";
     }
-
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-    const pad = (n) => n < 10 ? '0' + n : n;
-
-    display.innerHTML = `⏳ <span style="color: #ffd700;">${days}</span> Días | <span style="color: #ffd700;">${pad(hours)}</span>h : <span style="color: #ffd700;">${pad(minutes)}</span>m : <span style="color: #ffd700;">${pad(seconds)}</span>s`;
-}
-
-updateTimer();
-setInterval(updateTimer, 1000);
+    
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 </script>
-\"\"\", height=110)
+""", height=110)
 
 DATA_FILE = "actividades.json"
 PASSWORD_DOCENTE = "ohi2026"
 
 # -----------------------------------------------------------------------------
-# BASE DE DATOS DE LOS 11 ALUMNOS CON ESCUDOS Y COLORES ASIGNADOS
+# 3. BASE DE DATOS DE LOS 11 ALUMNOS CON SUS ESCUDOS Y COLORES NEÓN
 # -----------------------------------------------------------------------------
-ALUMNOS_PERFILES = {
-    "Estrella": {"escudo": "⭐", "nombre_escudo": "Estrella de Cima", "color": "#FF0055"},
-    "Yassine":  {"escudo": "🦅", "nombre_escudo": "Águila de Cumbre", "color": "#00E5FF"},
-    "Fabián":   {"escudo": "⚔️", "nombre_escudo": "Lanzas Cruzadas", "color": "#00FF66"},
-    "Claudia":  {"escudo": "👑", "nombre_escudo": "Corona de Mencey", "color": "#FFCC00"},
-    "Matías":   {"escudo": "🌋", "nombre_escudo": "Volcán Tajogaite", "color": "#FF6600"},
-    "Yeray":    {"escudo": "🛡️", "nombre_escudo": "Escudo Táctico", "color": "#AA00FF"},
-    "Adrián":   {"escudo": "☀️", "nombre_escudo": "Sol de Roque", "color": "#76FF03"},
-    "Yamila":   {"escudo": "🌙", "nombre_escudo": "Luna Aborigen", "color": "#00FFCC"},
-    "Gabriel":  {"escudo": "⚡", "nombre_escudo": "Rayo de Cima", "color": "#D500F9"},
-    "Juanmi":   {"escudo": "🔥", "nombre_escudo": "Fuego de Cumbre", "color": "#FF3333"},
-    "Paula":    {"escudo": "💎", "nombre_escudo": "Diamante Guanche", "color": "#3388FF"}
+ESTUDIANTES = {
+    "Estrella": {"escudo": "⭐", "color": "#FF0055", "titulo": "Estrella de Cima"},
+    "Yassine":  {"escudo": "🦅", "color": "#00E5FF", "titulo": "Águila de Cumbre"},
+    "Fabián":   {"escudo": "⚔️", "color": "#00FF66", "titulo": "Lanzas Cruzadas"},
+    "Claudia":  {"escudo": "👑", "color": "#FFCC00", "titulo": "Corona de Mencey"},
+    "Matías":   {"escudo": "🌋", "color": "#FF6600", "titulo": "Volcán Tajogaite"},
+    "Yeray":    {"escudo": "🛡️", "color": "#AA00FF", "titulo": "Escudo Táctico"},
+    "Adrián":   {"escudo": "☀️", "color": "#76FF03", "titulo": "Sol de Roque"},
+    "Yamila":   {"escudo": "🌙", "color": "#00FFCC", "titulo": "Luna Aborigen"},
+    "Gabriel":  {"escudo": "⚡", "color": "#D500F9", "titulo": "Rayo de Cima"},
+    "Juanmi":   {"escudo": "🔥", "color": "#FF3333", "titulo": "Fuego de Cumbre"},
+    "Paula":    {"escudo": "💎", "color": "#3388FF", "titulo": "Diamante Guanche"}
 }
 
 # -----------------------------------------------------------------------------
-# 2. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
+# 4. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
 # -----------------------------------------------------------------------------
 @st.cache_data
 def cargar_cantones_la_palma():
@@ -341,7 +222,7 @@ def cargar_cantones_la_palma():
         return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
 
 # -----------------------------------------------------------------------------
-# 3. PROCESAMIENTO DE GPX Y PERSISTENCIA DE DATOS
+# 5. PROCESAMIENTO DE GPX Y PERSISTENCIA
 # -----------------------------------------------------------------------------
 def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
     if len(puntos) < 3:
@@ -401,7 +282,7 @@ def cargar_actividades_persistentes():
         actividades.sort(key=lambda x: x['fecha'])
         return actividades
     except Exception as e:
-        st.error(f"Error cargando datos: {e}")
+        st.error(f"Error cargando persistencia: {e}")
         return []
 
 def guardar_actividades_persistentes(actividades):
@@ -420,22 +301,22 @@ if 'actividades' not in st.session_state:
     st.session_state.actividades = cargar_actividades_persistentes()
 
 # -----------------------------------------------------------------------------
-# 4. BARRA LATERAL DOCENTE
+# 6. BARRA LATERAL CON CONTROL DE ACCESO
 # -----------------------------------------------------------------------------
-st.sidebar.title("⚔️ PANEL DEL DOCENTE")
+st.sidebar.title("⚔️ PANEL DE CONTROL")
 
-pwd_input = st.sidebar.text_input("🔑 Contraseña Docente", type="password", help="Introduce la clave para gestionar rutas.")
+pwd_input = st.sidebar.text_input("🔑 Contraseña Docente", type="password", help="Acceso restringido para el profesorado.")
 
 if pwd_input == PASSWORD_DOCENTE:
     st.sidebar.success("🔓 Modo Docente Activo")
     st.sidebar.markdown("---")
-    st.sidebar.subheader("📤 Registrar Nueva Ruta GPX")
+    st.sidebar.subheader("📤 Registrar Ruta GPX")
     
-    lista_alumnos = sorted(list(ALUMNOS_PERFILES.keys()))
-    alumno_sel = st.sidebar.selectbox("Seleccionar Alumno/a (11 integrantes):", lista_alumnos)
+    lista_nombres = list(ESTUDIANTES.keys())
+    nombre_alumno = st.sidebar.selectbox("Seleccionar Alumno/a:", lista_nombres)
     
-    perf = ALUMNOS_PERFILES[alumno_sel]
-    st.sidebar.info(f"**Escudo:** {perf['escudo']} {perf['nombre_escudo']}\\n\\n**Color:** `{perf['color']}`")
+    info_est = ESTUDIANTES[nombre_alumno]
+    st.sidebar.info(f"Escudo: {info_est['escudo']} {info_est['titulo']} | Color: {info_est['color']}")
     
     fecha_ruta = st.sidebar.date_input("Fecha de la Ruta", value=datetime.now())
     hora_ruta = st.sidebar.time_input("Hora de la Ruta", value=datetime.now().time())
@@ -449,7 +330,7 @@ if pwd_input == PASSWORD_DOCENTE:
             
             if geom is not None:
                 st.session_state.actividades.append({
-                    'alumno': alumno_sel,
+                    'alumno': nombre_alumno,
                     'fecha': fecha_completa,
                     'geometria_utm': geom,
                     'tipo': tipo,
@@ -458,15 +339,15 @@ if pwd_input == PASSWORD_DOCENTE:
                 })
                 st.session_state.actividades.sort(key=lambda x: x['fecha'])
                 guardar_actividades_persistentes(st.session_state.actividades)
-                st.sidebar.success(f"¡Territorio de {perf['escudo']} {alumno_sel} registrado con éxito!")
+                st.sidebar.success(f"¡Territorio de {nombre_alumno} registrado!")
                 st.rerun()
             else:
-                st.sidebar.error("El archivo GPX no contiene datos válidos.")
+                st.sidebar.error("Archivo GPX sin datos válidos.")
         else:
             st.sidebar.warning("Selecciona un archivo GPX.")
             
     st.sidebar.markdown("---")
-    if st.sidebar.button("🗑️ Reiniciar Campaña"):
+    if st.sidebar.button("🗑️ Reiniciar Campaña (Borrar Todo)"):
         st.session_state.actividades = []
         if os.path.exists(DATA_FILE):
             os.remove(DATA_FILE)
@@ -474,10 +355,10 @@ if pwd_input == PASSWORD_DOCENTE:
         st.rerun()
 
 else:
-    st.sidebar.info("👁️ **Modo Estudiante (Solo Lectura)** - Consulta el mapa de dominio y clasificaciones en tiempo real.")
+    st.sidebar.info("👁️ Modo Estudiante (Solo Lectura)")
 
 # -----------------------------------------------------------------------------
-# 5. CÁLCULO DE SOLAPAMIENTOS Y COBERTURA POR CANTÓN
+# 7. CÁLCULO DE SOLAPAMIENTOS Y COBERTURA POR CANTÓN
 # -----------------------------------------------------------------------------
 def calcular_dominios_actuales():
     dominios = {}
@@ -514,11 +395,9 @@ def calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf):
                 
             if area_m2 > 0:
                 pct = (area_m2 / area_total_canton) * 100
-                escudo = ALUMNOS_PERFILES.get(alumno, {}).get("escudo", "🛡️")
                 filas.append({
                     "Cantón": nombre_canton,
-                    "Alumno/a": f"{escudo} {alumno}",
-                    "Nombre_Limpio": alumno,
+                    "Alumno/a": alumno,
                     "Superficie (m²)": round(area_m2, 2),
                     "Hectáreas (ha)": round(area_m2 / 10000.0, 2),
                     "% Conquistado del Cantón": round(pct, 2)
@@ -530,13 +409,13 @@ dominios_utm = calcular_dominios_actuales()
 cantones_gdf = cargar_cantones_la_palma()
 
 # -----------------------------------------------------------------------------
-# 6. INTERFAZ PRINCIPAL
+# 8. INTERFAZ WEB PRINCIPAL
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🗺️ MAPA DE DOMINIO",
-    "🏆 CLASIFICACIÓN GENERAL",
-    "👑 MENCEYES POR CANTÓN",
-    "📜 LIBRO DE GUERRA"
+    "MAPA DE DOMINIO",
+    "CLASIFICACIÓN GENERAL",
+    "MENCEYES POR CANTÓN",
+    "LIBRO DE GUERRA"
 ])
 
 with tab1:
@@ -546,9 +425,10 @@ with tab1:
         location=[28.65, -17.86],
         zoom_start=10,
         min_zoom=10,
-        tiles="OpenStreetMap"
+        tiles="OpenStreetMap",
+        max_bounds=True
     )
-    m.fit_bounds([[28.40, -18.05], [28.90, -17.65]])
+    m.fit_bounds([[28.4, -18.05], [28.9, -17.65]])
     
     # Capa de Cantones Benahoaritas
     for _, row in cantones_gdf.iterrows():
@@ -561,56 +441,39 @@ with tab1:
                 'fillOpacity': 0.15,
                 'dashArray': '5, 5'
             },
-            tooltip=f"<b>🏛️ Cantón:</b> {row['canton']}<br><b>Municipio:</b> {row.get('municipio', 'N/A')}"
+            tooltip=f"<b>🏛️ Cantón:</b> {row['canton']}<br><b>Territorio:</b> {row.get('municipio', 'N/A')}"
         ).add_to(m)
         
-    # Capa de Territorio Conquistado por Alumnos
+    # Capa de Dominios de los Estudiantes con sus Escudos y Colores
     for alumno, geom in dominios_utm.items():
         if geom is not None and not getattr(geom, 'is_empty', True):
             gdf_m = gpd.GeoDataFrame(geometry=[geom], crs="EPSG:32628").to_crs("EPSG:4326")
             geom_wgs = gdf_m.geometry.iloc[0]
             area_m2 = geom.area
             
-            perf = ALUMNOS_PERFILES.get(alumno, {"color": "#00E5FF", "escudo": "🛡️"})
-            color = perf["color"]
+            perf = ESTUDIANTES.get(alumno, {"color": "#00E5FF", "escudo": "🛡️"})
+            col = perf["color"]
             escudo = perf["escudo"]
             
-            # Polígono con el color personalizado del alumno
             folium.GeoJson(
                 sg.mapping(geom_wgs),
-                style_function=lambda x, col=color: {
-                    'fillColor': col,
-                    'color': col,
+                style_function=lambda x, color=col: {
+                    'fillColor': color,
+                    'color': color,
                     'weight': 3,
                     'fillOpacity': 0.6
                 },
-                tooltip=f"<b>{escudo} Dominio de:</b> {alumno}<br><b>Superficie:</b> {round(area_m2/10000, 2)} ha ({round(area_m2/1000000, 3)} km²)"
+                tooltip=f"<b>{escudo} Conquistador/a:</b> {alumno}<br><b>Dominio:</b> {round(area_m2/10000, 2)} ha ({round(area_m2/1000000, 3)} km²)"
             ).add_to(m)
             
-            # Marcador Flotante con el Escudo en el Centroide del Territorio
-            try:
-                centroide_wgs = geom_wgs.centroid
-                icon_html = f'''
-                <div style="
-                    background-color: #0d1117;
-                    border: 2px solid {color};
-                    border-radius: 50%;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 18px;
-                    box-shadow: 0 0 8px {color};
-                ">{escudo}</div>
-                '''
-                folium.Marker(
-                    location=[centroide_wgs.y, centroide_wgs.x],
-                    icon=folium.DivIcon(html=icon_html),
-                    tooltip=f"<b>Territorio de {escudo} {alumno}</b>"
-                ).add_to(m)
-            except Exception:
-                pass
+            # Marcador de Escudo en el Centroide del Dominio
+            centroid = geom_wgs.centroid
+            icon_html = f'<div style="font-size:24px; text-shadow: 0 0 5px #000; text-align:center;">{escudo}</div>'
+            folium.Marker(
+                location=[centroid.y, centroid.x],
+                icon=folium.DivIcon(html=icon_html),
+                tooltip=f"<b>{escudo} {alumno}</b>"
+            ).add_to(m)
             
     components.html(m._repr_html_(), height=650)
 
@@ -619,9 +482,9 @@ with tab2:
     ranking_data = []
     for alumno, geom in dominios_utm.items():
         area_m2 = geom.area if (geom is not None and not getattr(geom, 'is_empty', True)) else 0.0
-        perf = ALUMNOS_PERFILES.get(alumno, {"escudo": "🛡️", "color": "#ffffff"})
+        perf = ESTUDIANTES.get(alumno, {"escudo": "🛡️"})
         ranking_data.append({
-            "Conquistador/a": f"{perf['escudo']} {alumno}",
+            "Guerrero/a": f"{perf['escudo']} {alumno}",
             "Superficie (km²)": round(area_m2 / 1_000_000.0, 4),
             "Superficie (Hectáreas)": round(area_m2 / 10_000.0, 2),
             "Superficie (m²)": round(area_m2, 2)
@@ -630,9 +493,9 @@ with tab2:
     if ranking_data:
         df_ranking = pd.DataFrame(ranking_data).sort_values(by="Superficie (m²)", ascending=False)
         df_ranking.index = range(1, len(df_ranking) + 1)
-        st.dataframe(df_ranking[["Conquistador/a", "Superficie (km²)", "Superficie (Hectáreas)", "Superficie (m²)"]], use_container_width=True)
+        st.dataframe(df_ranking[["Guerrero/a", "Superficie (km²)", "Superficie (Hectáreas)", "Superficie (m²)"]], use_container_width=True)
     else:
-        st.info("Aún no se han registrado rutas. El docente debe subir los primeros archivos GPX.")
+        st.info("Aún no se han librado batallas por el territorio. El docente debe registrar las primeras rutas GPX.")
 
 with tab3:
     st.write("### 👑 Menceyes y Señoríos por Cantón")
@@ -646,11 +509,13 @@ with tab3:
         for i, cant in enumerate(cantones_conquistados):
             df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(by="Superficie (m²)", ascending=False)
             lider = df_sub.iloc[0]
+            al_nombre = lider['Alumno/a']
+            perf = ESTUDIANTES.get(al_nombre, {"escudo": "👑"})
             
             with cols[i % 3]:
                 st.metric(
                     label=f"🏛️ {cant}",
-                    value=f"{lider['Alumno/a']}",
+                    value=f"{perf['escudo']} {al_nombre}",
                     delta=f"{lider['Hectáreas (ha)']} ha ({lider['% Conquistado del Cantón']}% del cantón)"
                 )
                 
@@ -658,6 +523,7 @@ with tab3:
         
         canton_sel = st.selectbox("🔎 Inspeccionar Cantón:", cantones_conquistados)
         df_canton_especifico = df_cantones[df_cantones["Cantón"] == canton_sel].sort_values(by="Superficie (m²)", ascending=False)
+        df_canton_especifico['Alumno/a'] = df_canton_especifico['Alumno/a'].apply(lambda x: f"{ESTUDIANTES.get(x, {}).get('escudo', '🛡️')} {x}")
         df_canton_especifico.index = range(1, len(df_canton_especifico) + 1)
         
         st.write(f"### Disputa Territorial en **{canton_sel}**")
@@ -671,22 +537,12 @@ with tab3:
 with tab4:
     st.write("### 📜 Libro de Guerra y Registro de Incursiones")
     if st.session_state.actividades:
-        historial = []
-        for act in st.session_state.actividades:
-            al = act['alumno']
-            perf = ALUMNOS_PERFILES.get(al, {"escudo": "🛡️"})
-            historial.append({
-                "Fecha/Hora": act['fecha'].strftime("%Y-%m-%d %H:%M"),
-                "Conquistador/a": f"{perf['escudo']} {al}",
-                "Tipo de Incursión": act['tipo'],
-                "Archivo GPX": act['archivo']
-            })
+        historial = [{
+            "Fecha/Hora": act['fecha'].strftime("%Y-%m-%d %H:%M"),
+            "Conquistador/a": f"{ESTUDIANTES.get(act['alumno'], {}).get('escudo', '🛡️')} {act['alumno']}",
+            "Tipo de Incursión": act['tipo'],
+            "Archivo GPX": act['archivo']
+        } for act in st.session_state.actividades]
         st.table(pd.DataFrame(historial))
     else:
         st.info("El historial está limpio.")
-"""
-
-with open('/workspace/scratch/build.py', 'w', encoding='utf-8') as f:
-    f.write(app_code)
-
-print("build.py created successfully!")
