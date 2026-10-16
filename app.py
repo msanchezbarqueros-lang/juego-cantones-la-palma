@@ -335,12 +335,25 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     st.write("### 📍 Mapa Táctico de La Palma")
     
-    # MAPA CON CARTODB DARK MATTER BUILT-IN EN FOLIUM (100% GRATIS, SIN API KEY)
+    # USA MAPA ESTÁNDAR OPENSTREETMAP (100% LIBRE, SIN API KEY NUNCA)
     m = folium.Map(
         location=[28.65, -17.86],
         zoom_start=11,
-        tiles="CartoDB dark_matter"
+        tiles="OpenStreetMap"
     )
+    
+    # Inyecta CSS para oscurecer dinámicamente los mosaicos de mapa sin usar servidores externos con API Key
+    dark_map_css = """
+    <style>
+    .leaflet-tile-pane {
+        filter: invert(100%) hue-rotate(180deg) brightness(75%) contrast(150%);
+    }
+    .leaflet-container {
+        background: #0d1117 !important;
+    }
+    </style>
+    """
+    m.get_root().html.add_child(folium.Element(dark_map_css))
     
     # Capa de Cantones Benahoaritas
     for _, row in cantones_gdf.iterrows():
