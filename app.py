@@ -19,13 +19,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Estilo CSS Oscuro Táctico con letras blancas de alto contraste
+# Estilo CSS Oscuro Estilo Videojuego de Estrategia con Letras Blancas de Alto Contraste
 st.markdown("""
 <style>
-    /* Fondo principal y textos */
+    /* Fondo principal y textos generales en Blanco */
     .stApp {
         background-color: #0d1117;
-        color: #f0f6fc;
+        color: #ffffff !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
@@ -36,11 +36,11 @@ st.markdown("""
         border-radius: 12px;
         padding: 20px;
         text-align: center;
-        margin-bottom: 20px;
-        box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.2);
+        margin-bottom: 25px;
+        box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.25);
     }
     .header-title {
-        color: #ffd700;
+        color: #ffd700 !important;
         font-size: 2.2rem;
         font-weight: 800;
         text-transform: uppercase;
@@ -49,79 +49,97 @@ st.markdown("""
         text-shadow: 2px 2px 4px #000000;
     }
     .header-subtitle {
-        color: #e6edf3;
+        color: #ffffff !important;
         font-size: 1.05rem;
-        margin-top: 5px;
+        margin-top: 6px;
         font-weight: 500;
     }
 
-    /* Banner de Cuenta Atrás */
-    .countdown-box {
-        background-color: #1f242d;
-        border: 1px solid #ff4b4b;
+    /* Pestañas (Tabs) con Letras Blancas de Alto Contraste */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background-color: #161b22;
+        padding: 10px;
         border-radius: 10px;
-        padding: 12px 20px;
-        margin-bottom: 20px;
-        text-align: center;
-        box-shadow: 0 0 10px rgba(255, 75, 75, 0.3);
+        border: 1px solid #30363d;
     }
-    .countdown-title {
-        color: #ff4b4b;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .stTabs [data-baseweb="tab"] {
+        background-color: #21262d;
+        border-radius: 8px;
+        padding: 10px 16px;
+        border: 1px solid #30363d;
     }
-    .countdown-timer {
-        color: #ffffff;
-        font-size: 1.4rem;
-        font-weight: 800;
-        margin-top: 4px;
+    .stTabs [data-baseweb="tab"] p, .stTabs [data-baseweb="tab"] span, .stTabs [data-baseweb="tab"] div {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #ffd700 !important;
+        border: 1px solid #ffd700 !important;
+    }
+    .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span, .stTabs [aria-selected="true"] div {
+        color: #0d1117 !important;
+        font-weight: 900 !important;
+    }
+
+    /* Botones principales con Letras Blancas */
+    .stButton > button {
+        background-color: #21262d;
+        color: #ffffff !important;
+        font-weight: bold !important;
+        font-size: 1rem !important;
+        border: 1px solid #ffd700 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        transition: all 0.3s ease;
+    }
+    .stButton > button:hover {
+        background-color: #ffd700 !important;
+        color: #0d1117 !important;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
 
     /* Tarjetas de Métricas (Menceyes) */
     div[data-testid="stMetric"] {
         background-color: #161b22;
         border: 1px solid #30363d;
-        border-left: 4px solid #ffd700;
+        border-left: 5px solid #ffd700;
         border-radius: 8px;
-        padding: 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        padding: 14px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.6);
     }
-    div[data-testid="stMetricLabel"] {
+    div[data-testid="stMetricLabel"] p, div[data-testid="stMetricLabel"] label, div[data-testid="stMetricLabel"] span {
         color: #ffd700 !important;
-        font-weight: bold;
-        font-size: 1.05rem !important;
-    }
-    div[data-testid="stMetricValue"] {
-        color: #ffffff !important;
         font-weight: bold !important;
+        font-size: 1.1rem !important;
     }
-
-    /* Pestañas (Tabs) con Letras Blancas y Alto Contraste */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: #161b22;
-        padding: 8px;
-        border-radius: 8px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #21262d;
+    div[data-testid="stMetricValue"] div, div[data-testid="stMetricValue"] {
         color: #ffffff !important;
-        border-radius: 6px;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        padding: 10px 18px;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #ffd700 !important;
-        color: #0d1117 !important;
         font-weight: 800 !important;
     }
 
-    /* Títulos y etiquetas en general */
-    h1, h2, h3, h4, label, .stMarkdown {
+    /* Textos de Subtítulos y Secciones */
+    h1, h2, h3, h4, h5, h6 {
         color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+    p, span, label, div {
+        color: #ffffff !important;
+    }
+
+    /* Tablas y Dataframes */
+    .stDataFrame, .stTable {
+        background-color: #161b22;
+        border-radius: 8px;
+        color: #ffffff !important;
+    }
+
+    /* Selectbox y Formularios */
+    div[data-baseweb="select"] {
+        background-color: #21262d !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
     }
     
     /* Barra lateral */
@@ -134,28 +152,6 @@ st.markdown("""
 <div class="header-box">
     <div class="header-title">🌋 LA CONQUISTA DE LOS CANTONES</div>
     <div class="header-subtitle">Estrategia Territorial Benahoarita | Módulo OHI - La Palma</div>
-</div>
-""", unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# CUENTA ATRÁS HASTA EL CIERRE DE LA CAMPAÑA (30 DE MAYO, 23:59)
-# -----------------------------------------------------------------------------
-FECHA_LIMITE = datetime(2027, 5, 30, 23, 59, 59)
-ahora = datetime.now()
-diferencia = FECHA_LIMITE - ahora
-
-if diferencia.total_seconds() > 0:
-    dias = diferencia.days
-    horas, rem = divmod(diferencia.seconds, 3600)
-    minutos, segundos = divmod(rem, 60)
-    texto_cuenta_atras = f"⏳ {dias} días | {horas:02d}h {minutos:02d}m {segundos:02d}s restantes"
-else:
-    texto_cuenta_atras = "🛑 CAMPAÑA FINALIZADA (Plazo cerrado el 30 de mayo a las 23:59)"
-
-st.markdown(f"""
-<div class="countdown-box">
-    <div class="countdown-title">⏰ TIEMPO RESTANTE PARA ENVIAR RUTA GPX (Cierre: 30 de Mayo - 23:59)</div>
-    <div class="countdown-timer">{texto_cuenta_atras}</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -384,16 +380,16 @@ mapa_colores = {al: COLORES_NEON[i % len(COLORES_NEON)] for i, al in enumerate(a
 # 7. INTERFAZ WEB PRINCIPAL
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🗺️ MAPA DE DOMINIO",
-    "🏆 CLASIFICACIÓN GENERAL",
-    "👑 MENCEYES POR CANTÓN",
-    "📜 LIBRO DE GUERRA"
+    "MAPA DE DOMINIO",
+    "CLASIFICACIÓN GENERAL",
+    "MENCEYES POR CANTÓN",
+    "LIBRO DE GUERRA"
 ])
 
 with tab1:
     st.write("### 📍 Mapa Táctico de La Palma")
     
-    # MAPA CON OPENSTREETMAP NATIVO, CLARO Y SIN API KEY
+    # MAPA CON OPENSTREETMAP NATIVO (CLARO, PRECISO, SIN API KEY, ZOOM MÍNIMO 10 Y ENCUADRE A LA PALMA)
     m = folium.Map(
         location=[28.65, -17.86],
         zoom_start=10,
@@ -402,7 +398,7 @@ with tab1:
         tiles="OpenStreetMap"
     )
     
-    # Delimitar límites visuales estrictos en La Palma
+    # Restringir bordes de navegación estrictamente a la isla de La Palma
     m.fit_bounds([[28.4, -18.05], [28.9, -17.65]])
     
     # Capa de Cantones Benahoaritas
@@ -412,8 +408,8 @@ with tab1:
             style_function=lambda x: {
                 'fillColor': '#f4a261',
                 'color': '#e76f51',
-                'weight': 1.5,
-                'fillOpacity': 0.15,
+                'weight': 1.8,
+                'fillOpacity': 0.2,
                 'dashArray': '4, 4'
             },
             tooltip=f"<b>🏛️ Cantón:</b> {row['canton']}<br><b>Territorio:</b> {row.get('municipio', 'N/A')}"
