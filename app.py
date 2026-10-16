@@ -9,25 +9,90 @@ import shapely.geometry as sg
 import geopandas as gpd
 import pandas as pd
 
+# -----------------------------------------------------------------------------
+# 1. CONFIGURACIÓN DE PÁGINA Y ESTILO OSCURO "RUN AN EMPIRE"
+# -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="La Conquista de los Cantones - La Palma",
     page_icon="👑",
     layout="wide"
 )
 
+# Estilo CSS Oscuro Estilo Videojuego de Estrategia
 st.markdown("""
 <style>
-    .stApp { background-color: #0b0e14; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; }
-    .header-box { background: linear-gradient(135deg, #161b22 0%, #21262d 100%); border: 2px solid #ffd700; border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 25px; box-shadow: 0px 4px 20px rgba(255, 215, 0, 0.25); }
-    .header-title { color: #ffd700; font-size: 2.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin: 0; text-shadow: 2px 2px 6px #000000; }
-    .header-subtitle { color: #8b949e; font-size: 1.05rem; margin-top: 6px; letter-spacing: 1px; }
-    div[data-testid="stMetric"] { background-color: #161b22; border: 1px solid #30363d; border-left: 5px solid #ffd700; border-radius: 8px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
-    div[data-testid="stMetricLabel"] { color: #ffd700 !important; font-weight: bold; font-size: 1.05rem; }
-    div[data-testid="stMetricValue"] { color: #ffffff !important; font-size: 1.25rem !important; }
-    .stTabs [data-baseweb="tab-list"] { gap: 12px; background-color: #161b22; padding: 10px; border-radius: 10px; border: 1px solid #30363d; }
-    .stTabs [data-baseweb="tab"] { background-color: #21262d; color: #8b949e; border-radius: 6px; font-weight: bold; padding: 10px 20px; }
-    .stTabs [aria-selected="true"] { background-color: #ffd700 !important; color: #0b0e14 !important; font-weight: 900 !important; }
-    section[data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; }
+    /* Fondo principal y textos */
+    .stApp {
+        background-color: #0d1117;
+        color: #c9d1d9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Encabezado Épico */
+    .header-box {
+        background: linear-gradient(135deg, #161b22 0%, #21262d 100%);
+        border: 2px solid #ffd700;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 25px;
+        box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.2);
+    }
+    .header-title {
+        color: #ffd700;
+        font-size: 2.2rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 0;
+        text-shadow: 2px 2px 4px #000000;
+    }
+    .header-subtitle {
+        color: #8b949e;
+        font-size: 1rem;
+        margin-top: 5px;
+    }
+
+    /* Tarjetas de Métricas (Menceyes) */
+    div[data-testid="stMetric"] {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-left: 4px solid #ffd700;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #ffd700 !important;
+        font-weight: bold;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+
+    /* Pestañas */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #161b22;
+        padding: 8px;
+        border-radius: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #21262d;
+        color: #8b949e;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #ffd700 !important;
+        color: #0d1117 !important;
+    }
+    
+    /* Barra lateral */
+    section[data-testid="stSidebar"] {
+        background-color: #161b22;
+        border-right: 1px solid #30363d;
+    }
 </style>
 
 <div class="header-box">
@@ -37,10 +102,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "actividades.json"
-PASSWORD_DOCENTE = "ohi2026"
+PASSWORD_DOCENTE = "ohi2026"  # Contraseña para el modo profesor/a
 
+# -----------------------------------------------------------------------------
+# 2. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
+# -----------------------------------------------------------------------------
 @st.cache_data
 def cargar_cantones_la_palma():
+    """Carga los 12 cantones desde el GeoJSON o genera las geometrías base."""
     try:
         gdf = gpd.read_file("cantones_la_palma.geojson")
         return gdf
@@ -61,14 +130,20 @@ def cargar_cantones_la_palma():
         ]
         return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
 
+# -----------------------------------------------------------------------------
+# 3. PROCESAMIENTO DE GPX Y PERSISTENCIA DE DATOS
+# -----------------------------------------------------------------------------
 def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
     if len(puntos) < 3:
         return None, "Error: GPX con puntos insuficientes"
+        
     linea = sg.LineString(puntos)
     gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs("EPSG:32628")
     geom_utm = gdf_linea.geometry.iloc[0]
+    
     p_inicio = sg.Point(geom_utm.coords[0])
     p_fin = sg.Point(geom_utm.coords[-1])
+    
     if p_inicio.distance(p_fin) <= max_dist_cierre_m:
         poligono = sg.Polygon(geom_utm.coords)
         if not poligono.is_valid:
@@ -78,6 +153,7 @@ def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
     else:
         geom_conquista = geom_utm.buffer(franja_m)
         tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
+        
     return geom_conquista, tipo
 
 def extraer_puntos_gpx(archivo_gpx):
@@ -130,6 +206,9 @@ def guardar_actividades_persistentes(actividades):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+# -----------------------------------------------------------------------------
+# 4. ESTADO DE LA SESIÓN Y PALETA DE COLORES NEÓN
+# -----------------------------------------------------------------------------
 if 'actividades' not in st.session_state:
     st.session_state.actividades = cargar_actividades_persistentes()
 
@@ -138,7 +217,11 @@ COLORES_NEON = [
     "#FF6600", "#00FFCC", "#FF00AA", "#76FF03", "#D500F9"
 ]
 
+# -----------------------------------------------------------------------------
+# 5. BARRA LATERAL CON CONTROL DE ACCESO POR CONTRASEÑA
+# -----------------------------------------------------------------------------
 st.sidebar.title("⚔️ PANEL DE CONTROL")
+
 pwd_input = st.sidebar.text_input("🔑 Contraseña Docente", type="password", help="Acceso restringido para el profesorado.")
 
 if pwd_input == PASSWORD_DOCENTE:
@@ -182,9 +265,13 @@ if pwd_input == PASSWORD_DOCENTE:
             os.remove(DATA_FILE)
         st.sidebar.success("¡Campaña reiniciada!")
         st.rerun()
-else:
-    st.sidebar.info("👁️ Modo Estudiante (Solo Lectura). Consulta el mapa de dominio y las tablas de clasificación en tiempo real.")
 
+else:
+    st.sidebar.info("👁️ **Modo Estudiante (Solo Lectura)** - Consulta el mapa de dominio y las tablas de clasificación en tiempo real.")
+
+# -----------------------------------------------------------------------------
+# 6. CÁLCULO DE SOLAPAMIENTOS Y COBERTURA POR CANTÓN
+# -----------------------------------------------------------------------------
 def calcular_dominios_actuales():
     dominios = {}
     for act in st.session_state.actividades:
@@ -192,10 +279,10 @@ def calcular_dominios_actuales():
         nueva_geom = act['geometria_utm']
         
         for al in list(dominios.keys()):
-            if dominios[al] is not None and not getattr(dominios[al], "is_empty"):
+            if dominios[al] is not None and not getattr(dominios[al], 'is_empty', True):
                 dominios[al] = dominios[al].difference(nueva_geom)
                 
-        if alumno not in dominios or dominios[alumno] is None or getattr(dominios[alumno], "is_empty"):
+        if alumno not in dominios or dominios[alumno] is None or getattr(dominios[alumno], 'is_empty', True):
             dominios[alumno] = nueva_geom
         else:
             dominios[alumno] = dominios[alumno].union(nueva_geom)
@@ -212,7 +299,7 @@ def calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf):
         area_total_canton = geom_canton.area
         
         for alumno, geom_alumno in dominios_utm.items():
-            if geom_alumno is not None and not getattr(geom_alumno, "is_empty"):
+            if geom_alumno is not None and not getattr(geom_alumno, 'is_empty', True):
                 interseccion = geom_alumno.intersection(geom_canton)
                 area_m2 = interseccion.area
             else:
@@ -235,22 +322,27 @@ cantones_gdf = cargar_cantones_la_palma()
 alumnos_unicos = list(set([act['alumno'] for act in st.session_state.actividades]))
 mapa_colores = {al: COLORES_NEON[i % len(COLORES_NEON)] for i, al in enumerate(alumnos_unicos)}
 
+# -----------------------------------------------------------------------------
+# 7. INTERFAZ WEB PRINCIPAL
+# -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
-    "MAPA DE DOMINIO",
-    "CLASIFICACIÓN GENERAL",
-    "MENCEYES POR CANTÓN",
-    "LIBRO DE GUERRA"
+    "🗺️ MAPA DE DOMINIO",
+    "🏆 CLASIFICACIÓN GENERAL",
+    "👑 MENCEYES POR CANTÓN",
+    "📜 LIBRO DE GUERRA"
 ])
 
 with tab1:
     st.write("### 📍 Mapa Táctico de La Palma")
     
+    # MAPA CON CARTODB DARK MATTER BUILT-IN EN FOLIUM (100% GRATIS, SIN API KEY)
     m = folium.Map(
         location=[28.65, -17.86],
         zoom_start=11,
-        tiles="cartodbdark_matter"
+        tiles="CartoDB dark_matter"
     )
     
+    # Capa de Cantones Benahoaritas
     for _, row in cantones_gdf.iterrows():
         folium.GeoJson(
             sg.mapping(row['geometry']),
@@ -264,8 +356,9 @@ with tab1:
             tooltip=f"<b>🏛️ Cantón:</b> {row['canton']}<br><b>Territorio:</b> {row.get('municipio', 'N/A')}"
         ).add_to(m)
         
+    # Capa de Dominios Neón de los Estudiantes
     for alumno, geom in dominios_utm.items():
-        if geom is not None and not getattr(geom, "is_empty"):
+        if geom is not None and not getattr(geom, 'is_empty', True):
             gdf_m = gpd.GeoDataFrame(geometry=[geom], crs="EPSG:32628").to_crs("EPSG:4326")
             geom_wgs = gdf_m.geometry.iloc[0]
             area_m2 = geom.area
@@ -288,7 +381,7 @@ with tab2:
     st.write("### 🏆 Ranking General de la Isla")
     ranking_data = []
     for alumno, geom in dominios_utm.items():
-        area_m2 = geom.area if (geom is not None and not getattr(geom, "is_empty")) else 0.0
+        area_m2 = geom.area if (geom is not None and not getattr(geom, 'is_empty', True)) else 0.0
         ranking_data.append({
             "Alumno/a": alumno,
             "Superficie (km²)": round(area_m2 / 1_000_000.0, 4),
