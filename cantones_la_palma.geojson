@@ -1,0 +1,437 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tagalgen",
+        "municipio_actual": "Garafía",
+        "descripcion": "Cantón del extremo norte de la isla, caracterizado por profundos barrancos y pinar."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.98,
+              28.84
+            ],
+            [
+              -17.88,
+              28.86
+            ],
+            [
+              -17.85,
+              28.8
+            ],
+            [
+              -17.92,
+              28.76
+            ],
+            [
+              -17.99,
+              28.79
+            ],
+            [
+              -17.98,
+              28.84
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tagaragre",
+        "municipio_actual": "Barlovento",
+        "descripcion": "Cantón del noreste insular, zona húmeda de laurisilva y monteverde."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.88,
+              28.86
+            ],
+            [
+              -17.78,
+              28.83
+            ],
+            [
+              -17.78,
+              28.78
+            ],
+            [
+              -17.85,
+              28.77
+            ],
+            [
+              -17.85,
+              28.8
+            ],
+            [
+              -17.88,
+              28.86
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Adeyahamen",
+        "municipio_actual": "San Andrés y Sauces",
+        "descripcion": "Asentamiento clave con importantes cursos de agua y el gran poblado de El Tendal."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.85,
+              28.77
+            ],
+            [
+              -17.78,
+              28.78
+            ],
+            [
+              -17.74,
+              28.72
+            ],
+            [
+              -17.82,
+              28.71
+            ],
+            [
+              -17.85,
+              28.77
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tenagua",
+        "municipio_actual": "Puntallana",
+        "descripcion": "Cantón oriental entre el barranco de Santa Lucía y la costa de Tenagua."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.82,
+              28.71
+            ],
+            [
+              -17.74,
+              28.72
+            ],
+            [
+              -17.73,
+              28.66
+            ],
+            [
+              -17.8,
+              28.66
+            ],
+            [
+              -17.82,
+              28.71
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tedote",
+        "municipio_actual": "Santa Cruz de La Palma, Breña Alta y Breña Baja",
+        "descripcion": "Cantón de la vertiente este que abarca desde la bahía de la capital hasta Las Breñas."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.8,
+              28.66
+            ],
+            [
+              -17.73,
+              28.66
+            ],
+            [
+              -17.74,
+              28.58
+            ],
+            [
+              -17.82,
+              28.58
+            ],
+            [
+              -17.8,
+              28.66
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tigalate",
+        "municipio_actual": "Villa de Mazo",
+        "descripcion": "Extenso territorio del sureste con importantes cumbres y poblados como Belmaco."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.82,
+              28.58
+            ],
+            [
+              -17.74,
+              28.58
+            ],
+            [
+              -17.76,
+              28.5
+            ],
+            [
+              -17.84,
+              28.5
+            ],
+            [
+              -17.82,
+              28.58
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Ahenguareme",
+        "municipio_actual": "Fuencaliente",
+        "descripcion": "Extremo sur de la isla, dominado por el pinar y el volcanismo reciente de Cumbre Vieja."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.84,
+              28.5
+            ],
+            [
+              -17.76,
+              28.5
+            ],
+            [
+              -17.8,
+              28.43
+            ],
+            [
+              -17.86,
+              28.45
+            ],
+            [
+              -17.84,
+              28.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Guehevey",
+        "municipio_actual": "Las Manchas / Tamanca (El Paso - Los Llanos Sur)",
+        "descripcion": "Territorio del suroeste sobre coladas de lava y pastizales de Cumbre Vieja."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.9,
+              28.53
+            ],
+            [
+              -17.84,
+              28.5
+            ],
+            [
+              -17.83,
+              28.58
+            ],
+            [
+              -17.9,
+              28.58
+            ],
+            [
+              -17.9,
+              28.53
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tahuya",
+        "municipio_actual": "El Paso y zonas llanas de Tajuya",
+        "descripcion": "Ubicado en el llano de Aridane y faldas de Cumbre Vieja."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.9,
+              28.58
+            ],
+            [
+              -17.83,
+              28.58
+            ],
+            [
+              -17.83,
+              28.64
+            ],
+            [
+              -17.91,
+              28.63
+            ],
+            [
+              -17.9,
+              28.58
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Aridane",
+        "municipio_actual": "Los Llanos de Aridane y Tazacorte",
+        "descripcion": "Fértil valle occidental atravesado por el barranco de Las Angustias."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.96,
+              28.63
+            ],
+            [
+              -17.91,
+              28.63
+            ],
+            [
+              -17.88,
+              28.67
+            ],
+            [
+              -17.95,
+              28.68
+            ],
+            [
+              -17.96,
+              28.63
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Tijarafe",
+        "municipio_actual": "Tijarafe y Puntagorda",
+        "descripcion": "Gran cantón del noroeste caracterizado por espectaculares barrancos y acantilados."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.99,
+              28.79
+            ],
+            [
+              -17.92,
+              28.76
+            ],
+            [
+              -17.88,
+              28.67
+            ],
+            [
+              -17.95,
+              28.68
+            ],
+            [
+              -17.99,
+              28.79
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "canton": "Aceró",
+        "municipio_actual": "Caldera de Taburiente (El Paso)",
+        "descripcion": "Inexpugnable anfiteatro natural de La Caldera de Taburiente, liderado por Tanausú."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.92,
+              28.76
+            ],
+            [
+              -17.85,
+              28.77
+            ],
+            [
+              -17.82,
+              28.71
+            ],
+            [
+              -17.83,
+              28.64
+            ],
+            [
+              -17.88,
+              28.67
+            ],
+            [
+              -17.92,
+              28.76
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
