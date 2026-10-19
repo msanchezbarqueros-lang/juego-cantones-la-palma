@@ -291,10 +291,10 @@ ESTUDIANTES = {
     "Claudia": {"escudo": "👑", "titulo": "Corona de Mencey", "color": "#FFCC00"},
     "Matías": {"escudo": "🌋", "titulo": "Volcán Tajogaite", "color": "#FF6600"},
     "Yeray": {"escudo": "🛡️", "titulo": "Escudo Táctico", "color": "#AA00FF"},
-    "Adrián": {"escudo": "☀️", "titulo": "Sol de Roque", "color": "#76FF03"},
+    "Adrián": {"escudo": "🐂", "titulo": "La Cuadra Pichichi", "color": "#76FF03"},
     "Yamila": {"escudo": "🌙", "titulo": "Luna Aborigen", "color": "#00FFCC"},
-    "Gabriel": {"escudo": "⚡", "titulo": "Rayo de Cima", "color": "#D500F9"},
-    "Juanmi": {"escudo": "🔥", "titulo": "Fuego de Cumbre", "color": "#FF3333"},
+    "Gabriel": {"escudo": "🌌", "titulo": "Subiendo a la Cima", "color": "#D500F9"},
+    "Juanmi": {"escudo": "🏃🏽⚡️", "titulo": "El Polvacera", "color": "#FF3333"},
     "Paula": {"escudo": "💎", "titulo": "Diamante Guanche", "color": "#3388FF"}
 }
 
