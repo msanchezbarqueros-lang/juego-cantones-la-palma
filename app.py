@@ -628,7 +628,7 @@ cantones_gdf = cargar_cantones_la_palma()
 robados_m2_dict, perdidos_m2_dict, historial_robos_list = calcular_estadisticas_robos_globales()
 
 # -----------------------------------------------------------------------------
-# 8. INTERFAZ PRINCIPAL CON 5 PESTAÑAS
+# 8. INTERFAZ PRINCIPAL CON 6 PESTAÑAS
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🗺️ MAPA DE DOMINIO",
@@ -983,7 +983,7 @@ with tab3:
   else:
     st.info("Aún no se han producido robos territoriales en la campaña.")
 # -----------------------------------------------------------------------------
-# PESTAÑA: CLASIFICACIÓN DE VÍCTIMAS (LOS MÁS SAQUEADOS)
+# PESTAÑA 4: CLASIFICACIÓN DE VÍCTIMAS (LOS MÁS SAQUEADOS)
 # -----------------------------------------------------------------------------
 with tab_saqueados:
   st.write("### 🛡️ Los Guerreros Más Saqueados: Las Mayores Víctimas")
