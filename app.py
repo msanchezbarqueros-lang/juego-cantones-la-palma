@@ -853,7 +853,7 @@ with tab4:
         
         st.write("#### 🤴 Menceyes Actuales")
         cols = st.columns(3)
-               for i, cant in enumerate(cantones_conquistados):
+        for i, cant in enumerate(cantones_conquistados):
           df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(
               by="Superficie (m²)", ascending=False
           )
