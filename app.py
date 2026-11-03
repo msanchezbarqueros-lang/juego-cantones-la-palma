@@ -633,7 +633,7 @@ robados_m2_dict, perdidos_m2_dict, historial_robos_list = calcular_estadisticas_
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "🗺️ MAPA DE DOMINIO",
     "🏆 CLASIFICACIÓN GENERAL",
-    "⚡ CLASIFICACIÓN SEMANAL",
+    "🏴‍☠️ RANKING DE LADRONES",
     "👑 MENCEYES POR CANTÓN",
     "📜 LIBRO DE GUERRA"
 ])
@@ -843,121 +843,144 @@ with tab2:
     st.info("Aún no se han registrado rutas en la campaña.")
 
 # -----------------------------------------------------------------------------
-# PESTAÑA 3: CLASIFICACIÓN SEMANAL
+# PESTAÑA 3: CLASIFICACIÓN DE LADRONES (SAQUEADORES DE TERRITORIO)
 # -----------------------------------------------------------------------------
 with tab3:
-    st.write("### ⚡ Clasificación Semanal de Conquista")
-    
-    now_dt = datetime.now()
-    cur_year, cur_week, _ = now_dt.isocalendar()
-    
-    # Construcción del selector semanal (Semana Actual vs Semana Anterior)
-    opciones_semanas = {}
-    
-    # Semana actual
-    l_cur_start = now_dt - timedelta(days=now_dt.weekday())
-    l_cur_end = l_cur_start + timedelta(days=6)
-    str_cur = f"Semana Actual ({cur_week}) [{l_cur_start.strftime('%d %b')} - {l_cur_end.strftime('%d %b %Y')}]"
-    opciones_semanas[str_cur] = (cur_year, cur_week)
-    
-    # Semanas anteriores
-    for w_back in range(1, 12):
-        dt_ref = now_dt - timedelta(weeks=w_back)
-        y_ref, w_ref, _ = dt_ref.isocalendar()
-        dt_start = dt_ref - timedelta(days=dt_ref.weekday())
-        dt_end = dt_start + timedelta(days=6)
-        
-        tag_ant = " [SEMANA ANTERIOR]" if w_back == 1 else ""
-        label_w = f"Semana {w_ref}{tag_ant} [{dt_start.strftime('%d %b')} - {dt_end.strftime('%d %b %Y')}]"
-        opciones_semanas[label_w] = (y_ref, w_ref)
-        
-    lista_labels = list(opciones_semanas.keys())
-    idx_default = 1 if len(lista_labels) > 1 else 0
-    
-    sem_seleccionada_str = st.selectbox(
-        "📅 Seleccionar Semana de Campaña:",
-        lista_labels,
-        index=idx_default
+  st.write("### 🏴‍☠️ Clasificación de Ladrones: Los Mayores Saqueadores")
+  st.markdown(
+      "*Ranking táctico de los guerreros/as que más superficie han arrebatado a"
+      " sus rivales en la campaña.*"
+  )
+
+  ladrones_data = []
+  for alumno in ESTUDIANTES.keys():
+    perf = ESTUDIANTES[alumno]
+    rob_km2 = round(robados_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    perd_km2 = round(perdidos_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    balance_km2 = round(rob_km2 - perd_km2, 4)
+
+    geom = dominios_utm.get(alumno, None)
+    area_m2 = (
+        geom.area
+        if (geom is not None and not getattr(geom, "is_empty", True))
+        else 0.0
     )
-    
-    sel_year, sel_week = opciones_semanas[sem_seleccionada_str]
-    
-    # Filtrar actividades de esa semana
-    actividades_semana = []
-    for act in st.session_state.actividades:
-        ay, aw, _ = act['fecha'].isocalendar()
-        if ay == sel_year and aw == sel_week:
-            actividades_semana.append(act)
-            
-    if actividades_semana:
-        sum_semanal = {al: 0.0 for al in ESTUDIANTES.keys()}
-        count_rutas = {al: 0 for al in ESTUDIANTES.keys()}
-        cantones_rutas = {al: set() for al in ESTUDIANTES.keys()}
-        cantones_utm = cargar_cantones_la_palma().to_crs("EPSG:32628")
-        
-        for act in actividades_semana:
-            al = act['alumno']
-            geom = act['geometria_utm']
-            sum_semanal[al] += geom.area
-            count_rutas[al] += 1
-            
-            for _, c_row in cantones_utm.iterrows():
-                if c_row['geometry'].intersects(geom):
-                    cantones_rutas[al].add(c_row['canton'])
-                    
-        filas_semana = []
-        for al, area_m2 in sum_semanal.items():
-            if area_m2 > 0:
-                p = ESTUDIANTES[al]
-                c_str = ", ".join(sorted(list(cantones_rutas[al]))) if cantones_rutas[al] else "Sin cantón"
-                filas_semana.append({
-                    "Guerrero/a": f"{p['escudo']} {al}",
-                    "Hectáreas Sumadas (ha)": round(area_m2 / 10000.0, 2),
-                    "Superficie (m²)": round(area_m2, 2),
-                    "Rutas Realizadas": count_rutas[al],
-                    "Cantones Explorados": c_str,
-                    "_sort": area_m2
-                })
-                
-        if filas_semana:
-            df_sem = pd.DataFrame(filas_semana).sort_values(by="_sort", ascending=False)
-            
-            # Podio semanal
-            lider_sem = df_sem.iloc[0]
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(22, 27, 34, 0.9) 100%);
-                border: 2px solid #ffd700;
-                border-radius: 12px;
-                padding: 16px;
-                text-align: center;
-                margin-bottom: 20px;
-                box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-            ">
-                <div style="color: #ffd700; font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 800;">
-                    🏆 CAMPEÓN/A DE LA {sem_seleccionada_str.split('[')[0]}
-                </div>
-                <div style="color: #ffffff; font-size: 1.8rem; font-weight: 900; margin: 8px 0;">
-                    🥇 {lider_sem['Guerrero/a']}
-                </div>
-                <div style="color: #00FF66; font-size: 1.1rem; font-weight: 800;">
-                    + {lider_sem['Hectáreas Sumadas (ha)']} ha conquistadas ({lider_sem['Rutas Realizadas']} rutas)
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            medallas = ["🥇 1.º", "🥈 2.º", "🥉 3.º"] + [f"🏅 {i}º" for i in range(4, len(df_sem) + 1)]
-            df_sem["Posición"] = medallas[:len(df_sem)]
-            df_sem.index = range(1, len(df_sem) + 1)
-            
-            st.dataframe(
-                df_sem[["Posición", "Guerrero/a", "Hectáreas Sumadas (ha)", "Superficie (m²)", "Rutas Realizadas", "Cantones Explorados"]],
-                use_container_width=True
-            )
-        else:
-            st.info("Sin registros de territorio conquistado en la semana elegida.")
-    else:
-        st.info("No hay rutas registradas en la semana elegida.")
+    sup_actual_km2 = round(area_m2 / 1_000_000.0, 4)
+
+    ladrones_data.append({
+        "Saqueador/a": f"{perf['escudo']} {alumno}",
+        "km² Robados": rob_km2,
+        "km² Perdidos": perd_km2,
+        "Balance Neto (km²)": (
+            f"+{balance_km2}" if balance_km2 > 0 else f"{balance_km2}"
+        ),
+        "Superficie Actual (km²)": sup_actual_km2,
+        "_rob_sort": robados_m2_dict.get(alumno, 0.0),
+    })
+
+  if ladrones_data:
+    df_ladrones = pd.DataFrame(ladrones_data).sort_values(
+        by="_rob_sort", ascending=False
+    )
+
+    # Filtramos a los que efectivamente han realizado algún robo (> 0 m²)
+    df_activos = df_ladrones[df_ladrones["_rob_sort"] > 0]
+
+    # =========================================================================
+    # 🏅 PODIO DE SAQUEADORES (ORO, PLATA Y BRONCE)
+    # =========================================================================
+    if not df_activos.empty:
+      n_podio = min(3, len(df_activos))
+      cols_podio = st.columns(3)
+
+      estilos_ladrones = [
+          {
+              "puesto": "🥇 GRAN SAQUEADOR/A",
+              "color": "#ffd700",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(255, 215, 0, 0.35)",
+          },
+          {
+              "puesto": "🥈 2.º SAQUEADOR/A",
+              "color": "#c0c0c0",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(192, 192, 192, 0.20) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(192, 192, 192, 0.25)",
+          },
+          {
+              "puesto": "🥉 3.º SAQUEADOR/A",
+              "color": "#cd7f32",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(205, 127, 50, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(205, 127, 50, 0.25)",
+          },
+      ]
+
+      for i in range(n_podio):
+        lider_i = df_activos.iloc[i]
+        est = estilos_ladrones[i]
+
+        with cols_podio[i]:
+          st.markdown(
+              f"""
+                    <div style="
+                        background: {est['gradiente']};
+                        border: 2px solid {est['color']};
+                        border-radius: 12px;
+                        padding: 16px 12px;
+                        text-align: center;
+                        margin-bottom: 20px;
+                        box-shadow: 0 0 14px {est['sombra']};
+                        min-height: 145px;
+                    ">
+                        <div style="color: {est['color']}; font-size: 1.0rem; font-weight: 800; letter-spacing: 0.5px;">
+                            {est['puesto']}
+                        </div>
+                        <div style="color: #ffffff; font-size: 1.35rem; font-weight: 900; margin: 8px 0; word-break: break-word;">
+                            {lider_i['Saqueador/a']}
+                        </div>
+                        <div style="color: #f87171; font-size: 1.15rem; font-weight: 900;">
+                            🗡️ +{lider_i['km² Robados']} km²
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 4px;">
+                            Balance neto: <strong>{lider_i['Balance Neto (km²)']} km²</strong>
+                        </div>
+                    </div>
+                    """,
+              unsafe_allow_html=True,
+          )
+
+      st.markdown("---")
+
+    # =========================================================================
+    # TABLA GENERAL DE SAQUEOS
+    # =========================================================================
+    medallas_lad = ["🥇 1.º", "🥈 2.º", "🥉 3.º"] + [
+        f"🏅 {i}º" for i in range(4, len(df_ladrones) + 1)
+    ]
+    df_ladrones["Posición"] = medallas_lad[: len(df_ladrones)]
+    df_ladrones.index = range(1, len(df_ladrones) + 1)
+
+    st.dataframe(
+        df_ladrones[[
+            "Posición",
+            "Saqueador/a",
+            "km² Robados",
+            "km² Perdidos",
+            "Balance Neto (km²)",
+            "Superficie Actual (km²)",
+        ]],
+        use_container_width=True,
+    )
+  else:
+    st.info("Aún no se han producido robos territoriales en la campaña.")
 
 # -----------------------------------------------------------------------------
 # PESTAÑA 4: MENCEYES POR CANTÓN
