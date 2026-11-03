@@ -449,6 +449,48 @@ if pwd_input == PASSWORD_DOCENTE:
             st.sidebar.warning("Selecciona un archivo GPX.")
             
     st.sidebar.markdown("---")
+    # =========================================================================
+    # 👇 NUEVO BLOQUE: GESTIÓN Y BORRADO INDIVIDUAL DE RUTAS GPX 👇
+    # =========================================================================
+    st.sidebar.subheader("🗑️ Eliminar Rutas Subidas")
+    
+    if st.session_state.actividades:
+        st.sidebar.caption(f"Rutas activas: {len(st.session_state.actividades)}")
+        
+        # Mostramos cada ruta con el nombre del alumno y un botón para borrarla
+        for idx, act in enumerate(st.session_state.actividades):
+            col_info, col_del = st.sidebar.columns([3, 1])
+            
+            # Nombre del alumno y archivo o fecha
+            alumno_nom = act.get('alumno', 'Desconocido')
+            nom_arch = act.get('archivo', f"Ruta {idx+1}")
+            
+            col_info.caption(f"👤 **{alumno_nom}**  \n📄 *{nom_arch}*")
+            
+            # Botón de borrado individual
+            if col_del.button("❌", key=f"del_act_{idx}", help=f"Borrar ruta de {alumno_nom}"):
+                # 1. Eliminamos solo esta actividad de la lista
+                st.session_state.actividades.pop(idx)
+                
+                # 2. Guardamos la lista actualizada en el archivo DATA_FILE
+                guardar_actividades_persistentes(st.session_state.actividades)
+                
+                st.sidebar.success(f"Ruta de {alumno_nom} eliminada.")
+                st.rerun()  # Recarga la página y actualiza el mapa al instante
+    else:
+        st.sidebar.caption("No hay rutas registradas.")
+    # =========================================================================
+    
+    st.sidebar.markdown("---")
+    if st.sidebar.button("⚠️ Reiniciar Toda la Campaña"):
+        st.session_state.actividades = []
+        if os.path.exists(DATA_FILE):
+            os.remove(DATA_FILE)
+        st.sidebar.success("¡Campaña reiniciada!")
+        st.rerun()
+
+else:
+    st.sidebar.info("👁️ **Modo Estudiante (Solo Lectura)** - Consulta el mapa de dominio y las clasificaciones en tiempo real.")
     if st.sidebar.button("🗑️ Reiniciar Campaña"):
         st.session_state.actividades = []
         if os.path.exists(DATA_FILE):
