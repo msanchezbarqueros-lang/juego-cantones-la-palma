@@ -982,6 +982,7 @@ with tab3:
     )
   else:
     st.info("Aún no se han producido robos territoriales en la campaña.")
+
 # -----------------------------------------------------------------------------
 # PESTAÑA 4: CLASIFICACIÓN DE VÍCTIMAS (LOS MÁS SAQUEADOS)
 # -----------------------------------------------------------------------------
