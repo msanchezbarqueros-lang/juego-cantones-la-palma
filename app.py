@@ -853,18 +853,39 @@ with tab4:
         
         st.write("#### 🤴 Menceyes Actuales")
         cols = st.columns(3)
-        for i, cant in enumerate(cantones_conquistados):
-            df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(by="Superficie (m²)", ascending=False)
-            lider = df_sub.iloc[0]
-            al_nombre = lider['Alumno/a']
-            perf = ESTUDIANTES.get(al_nombre, {"escudo": "👑"})
-            
-            with cols[i % 3]:
-                st.metric(
-                    label=f"🏛️ {cant}",
-                    value=f"{perf['escudo']} {al_nombre}",
-                    delta=f"{lider['Hectáreas (ha)']} ha ({lider['% Conquistado del Cantón']}% del cantón)"
-                )
+               for i, cant in enumerate(cantones_conquistados):
+          df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(
+              by="Superficie (m²)", ascending=False
+          )
+          lider = df_sub.iloc[0]
+          al_nombre = lider["Alumno/a"]
+          perf = ESTUDIANTES.get(al_nombre, {"escudo": "👑"})
+
+          with cols[i % 3]:
+            st.markdown(
+                f"""
+                    <div style="
+                        background-color: #1e293b;
+                        border: 1px solid #334155;
+                        border-left: 5px solid #f59e0b;
+                        border-radius: 8px;
+                        padding: 12px 14px;
+                        margin-bottom: 12px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    ">
+                        <div style="font-size: 13px; font-weight: bold; color: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            🏛️ Cantón de {cant}
+                        </div>
+                        <div style="font-size: 18px; font-weight: bold; color: #ffffff; margin-bottom: 6px;">
+                            {perf['escudo']} {al_nombre}
+                        </div>
+                        <div style="font-size: 12.5px; font-weight: 600; color: #34d399;">
+                            ▲ {lider['Hectáreas (ha)']} ha ({lider['% Conquistado del Cantón']}% del cantón)
+                        </div>
+                    </div>
+                    """,
+                unsafe_allow_html=True,
+            )
                 
         st.markdown("---")
         
