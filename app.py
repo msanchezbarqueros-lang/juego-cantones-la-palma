@@ -630,7 +630,7 @@ robados_m2_dict, perdidos_m2_dict, historial_robos_list = calcular_estadisticas_
 # -----------------------------------------------------------------------------
 # 8. INTERFAZ PRINCIPAL CON 6 PESTAÑAS
 # -----------------------------------------------------------------------------
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab_saqueados, tab4, tab5 = st.tabs([
     "🗺️ MAPA DE DOMINIO",
     "🏆 CLASIFICACIÓN GENERAL",
     "🏴‍☠️ RANKING DE LADRONES",
