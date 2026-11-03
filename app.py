@@ -630,10 +630,11 @@ robados_m2_dict, perdidos_m2_dict, historial_robos_list = calcular_estadisticas_
 # -----------------------------------------------------------------------------
 # 8. INTERFAZ PRINCIPAL CON 5 PESTAÑAS
 # -----------------------------------------------------------------------------
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🗺️ MAPA DE DOMINIO",
     "🏆 CLASIFICACIÓN GENERAL",
     "🏴‍☠️ RANKING DE LADRONES",
+    "🛡️ LOS MÁS SAQUEADOS",
     "👑 MENCEYES POR CANTÓN",
     "📜 LIBRO DE GUERRA"
 ])
@@ -981,9 +982,148 @@ with tab3:
     )
   else:
     st.info("Aún no se han producido robos territoriales en la campaña.")
+# -----------------------------------------------------------------------------
+# PESTAÑA: CLASIFICACIÓN DE VÍCTIMAS (LOS MÁS SAQUEADOS)
+# -----------------------------------------------------------------------------
+with tab_saqueados:
+  st.write("### 🛡️ Los Guerreros Más Saqueados: Las Mayores Víctimas")
+  st.markdown(
+      "*Ranking de honor a la resistencia: los alumnos y alumnas a quienes más"
+      " territorio han arrebatado los invasores rivales.*"
+  )
+
+  victimas_data = []
+  for alumno in ESTUDIANTES.keys():
+    perf = ESTUDIANTES[alumno]
+    rob_km2 = round(robados_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    perd_km2 = round(perdidos_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    balance_km2 = round(rob_km2 - perd_km2, 4)
+
+    geom = dominios_utm.get(alumno, None)
+    area_m2 = (
+        geom.area
+        if (geom is not None and not getattr(geom, "is_empty", True))
+        else 0.0
+    )
+    sup_actual_km2 = round(area_m2 / 1_000_000.0, 4)
+
+    victimas_data.append({
+        "Guerrero/a Damnificado/a": f"{perf['escudo']} {alumno}",
+        "km² que me han Robado": perd_km2,
+        "km² que he Robado": rob_km2,
+        "Balance Neto (km²)": (
+            f"+{balance_km2}" if balance_km2 > 0 else f"{balance_km2}"
+        ),
+        "Superficie Restante (km²)": sup_actual_km2,
+        "_perd_sort": perdidos_m2_dict.get(alumno, 0.0),
+    })
+
+  if victimas_data:
+    df_victimas = pd.DataFrame(victimas_data).sort_values(
+        by="_perd_sort", ascending=False
+    )
+
+    # Filtramos a los que efectivamente han sufrido algún expolio (> 0 m²)
+    df_afectados = df_victimas[df_victimas["_perd_sort"] > 0]
+
+    # =========================================================================
+    # 🏅 PODIO DE VÍCTIMAS (ORO, PLATA Y BRONCE)
+    # =========================================================================
+    if not df_afectados.empty:
+      n_podio = min(3, len(df_afectados))
+      cols_podio = st.columns(3)
+
+      estilos_victimas = [
+          {
+              "puesto": "🥇 MAYOR DAMNIFICADO/A",
+              "color": "#ffd700",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(255, 215, 0, 0.35)",
+          },
+          {
+              "puesto": "🥈 2.º MÁS AFECTADO/A",
+              "color": "#c0c0c0",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(192, 192, 192, 0.20) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(192, 192, 192, 0.25)",
+          },
+          {
+              "puesto": "🥉 3.º MÁS AFECTADO/A",
+              "color": "#cd7f32",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(205, 127, 50, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(205, 127, 50, 0.25)",
+          },
+      ]
+
+      for i in range(n_podio):
+        lider_i = df_afectados.iloc[i]
+        est = estilos_victimas[i]
+
+        with cols_podio[i]:
+          st.markdown(
+              f"""
+                    <div style="
+                        background: {est['gradiente']};
+                        border: 2px solid {est['color']};
+                        border-radius: 12px;
+                        padding: 16px 12px;
+                        text-align: center;
+                        margin-bottom: 20px;
+                        box-shadow: 0 0 14px {est['sombra']};
+                        min-height: 145px;
+                    ">
+                        <div style="color: {est['color']}; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.5px;">
+                            {est['puesto']}
+                        </div>
+                        <div style="color: #ffffff; font-size: 1.35rem; font-weight: 900; margin: 8px 0; word-break: break-word;">
+                            {lider_i['Guerrero/a Damnificado/a']}
+                        </div>
+                        <div style="color: #ef4444; font-size: 1.15rem; font-weight: 900;">
+                            💔 -{lider_i['km² que me han Robado']} km²
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 4px;">
+                            Le queda: <strong>{lider_i['Superficie Restante (km²)']} km²</strong> (Neto: {lider_i['Balance Neto (km²)']} km²)
+                        </div>
+                    </div>
+                    """,
+              unsafe_allow_html=True,
+          )
+
+      st.markdown("---")
+
+    # =========================================================================
+    # TABLA COMPLETA DE VÍCTIMAS
+    # =========================================================================
+    medallas_vic = ["🥇 1.º", "🥈 2.º", "🥉 3.º"] + [
+        f"🏅 {i}º" for i in range(4, len(df_victimas) + 1)
+    ]
+    df_victimas["Posición"] = medallas_vic[: len(df_victimas)]
+    df_victimas.index = range(1, len(df_victimas) + 1)
+
+    st.dataframe(
+        df_victimas[[
+            "Posición",
+            "Guerrero/a Damnificado/a",
+            "km² que me han Robado",
+            "km² que he Robado",
+            "Balance Neto (km²)",
+            "Superficie Restante (km²)",
+        ]],
+        use_container_width=True,
+    )
+  else:
+    st.info("Aún no se han registrado saqueos territoriales en la campaña.")
 
 # -----------------------------------------------------------------------------
-# PESTAÑA 4: MENCEYES POR CANTÓN
+# PESTAÑA 5: MENCEYES POR CANTÓN
 # -----------------------------------------------------------------------------
 with tab4:
     st.write("### 👑 Menceyes y Señoríos por Cantón")
@@ -1043,7 +1183,7 @@ with tab4:
         st.info("Ningún cantón ha sido conquistado todavía.")
 
 # -----------------------------------------------------------------------------
-# PESTAÑA 5: LIBRO DE GUERRA
+# PESTAÑA 6: LIBRO DE GUERRA
 # -----------------------------------------------------------------------------
 with tab5:
     st.write("### 📜 Libro de Guerra y Registro de Incursiones")
