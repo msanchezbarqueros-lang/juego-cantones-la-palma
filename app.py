@@ -717,34 +717,130 @@ with tab1:
 # PESTAÑA 2: CLASIFICACIÓN GENERAL
 # -----------------------------------------------------------------------------
 with tab2:
-    st.write("### 🏆 Ranking General de la Isla")
-    ranking_data = []
-    
-    for alumno in ESTUDIANTES.keys():
-        geom = dominios_utm.get(alumno, None)
-        area_m2 = geom.area if (geom is not None and not getattr(geom, 'is_empty', True)) else 0.0
-        perf = ESTUDIANTES[alumno]
-        
-        rob_km2 = round(robados_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
-        perd_km2 = round(perdidos_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
-        
-        ranking_data.append({
-            "Guerrero/a": f"{perf['escudo']} {alumno}",
-            "Superficie (km²)": round(area_m2 / 1_000_000.0, 4),
-            "km² que he robado (total)": rob_km2,
-            "km² que me han robado (total)": perd_km2,
-            "_area_sort": area_m2
-        })
-        
-    if ranking_data:
-        df_ranking = pd.DataFrame(ranking_data).sort_values(by="_area_sort", ascending=False)
-        df_ranking.index = range(1, len(df_ranking) + 1)
-        st.dataframe(
-            df_ranking[["Guerrero/a", "Superficie (km²)", "km² que he robado (total)", "km² que me han robado (total)"]],
-            use_container_width=True
-        )
-    else:
-        st.info("Aún no se han registrado rutas en la campaña.")
+  st.write("### 🏆 Ranking General de la Isla")
+  ranking_data = []
+  for alumno in ESTUDIANTES.keys():
+    geom = dominios_utm.get(alumno, None)
+    area_m2 = (
+        geom.area
+        if (geom is not None and not getattr(geom, "is_empty", True))
+        else 0.0
+    )
+    perf = ESTUDIANTES[alumno]
+    rob_km2 = round(robados_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    perd_km2 = round(perdidos_m2_dict.get(alumno, 0.0) / 1_000_000.0, 4)
+    ranking_data.append({
+        "Guerrero/a": f"{perf['escudo']} {alumno}",
+        "Superficie (km²)": round(area_m2 / 1_000_000.0, 4),
+        "km² que he robado (total)": rob_km2,
+        "km² que me han robado (total)": perd_km2,
+        "_area_sort": area_m2,
+    })
+
+  if ranking_data:
+    df_ranking = pd.DataFrame(ranking_data).sort_values(
+        by="_area_sort", ascending=False
+    )
+
+    # Solo mostramos en el podio a los alumnos que tengan superficie conquistada (> 0 m²)
+    df_conquistadores = df_ranking[df_ranking["_area_sort"] > 0]
+
+    # =========================================================================
+    # 🏅 PODIO DE HONOR GENERAL (ORO, PLATA Y BRONCE)
+    # =========================================================================
+    if not df_conquistadores.empty:
+      n_podio = min(3, len(df_conquistadores))
+      cols_podio = st.columns(3)
+
+      # Estilos para cada posición: Oro, Plata y Bronce
+      estilos_podio = [
+          {
+              "puesto": "🥇 1.º PUESTO",
+              "color": "#ffd700",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(255, 215, 0, 0.35)",
+          },
+          {
+              "puesto": "🥈 2.º PUESTO",
+              "color": "#c0c0c0",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(192, 192, 192, 0.20) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(192, 192, 192, 0.25)",
+          },
+          {
+              "puesto": "🥉 3.º PUESTO",
+              "color": "#cd7f32",
+              "gradiente": (
+                  "linear-gradient(135deg, rgba(205, 127, 50, 0.22) 0%,"
+                  " rgba(22, 27, 34, 0.95) 100%)"
+              ),
+              "sombra": "rgba(205, 127, 50, 0.25)",
+          },
+      ]
+
+      for i in range(n_podio):
+        lider_i = df_conquistadores.iloc[i]
+        est = estilos_podio[i]
+
+        with cols_podio[i]:
+          st.markdown(
+              f"""
+                    <div style="
+                        background: {est['gradiente']};
+                        border: 2px solid {est['color']};
+                        border-radius: 12px;
+                        padding: 16px 12px;
+                        text-align: center;
+                        margin-bottom: 20px;
+                        box-shadow: 0 0 14px {est['sombra']};
+                        min-height: 145px;
+                    ">
+                        <div style="color: {est['color']}; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">
+                            {est['puesto']}
+                        </div>
+                        <div style="color: #ffffff; font-size: 1.35rem; font-weight: 900; margin: 8px 0; word-break: break-word;">
+                            {lider_i['Guerrero/a']}
+                        </div>
+                        <div style="color: #00FF66; font-size: 1.05rem; font-weight: 800;">
+                            ⚔️ {lider_i['Superficie (km²)']} km²
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 4px;">
+                            Robados: +{lider_i['km² que he robado (total)']} km²
+                        </div>
+                    </div>
+                    """,
+              unsafe_allow_html=True,
+          )
+
+      st.markdown("---")
+
+    # =========================================================================
+    # TABLA GENERAL DETALLADA
+    # =========================================================================
+    # Añadimos la columna visual de medallas/posiciones igual que en la semanal
+    medallas_gen = ["🥇 1.º", "🥈 2.º", "🥉 3.º"] + [
+        f"🏅 {i}º" for i in range(4, len(df_ranking) + 1)
+    ]
+    df_ranking["Posición"] = medallas_gen[: len(df_ranking)]
+    df_ranking.index = range(1, len(df_ranking) + 1)
+
+    st.dataframe(
+        df_ranking[[
+            "Posición",
+            "Guerrero/a",
+            "Superficie (km²)",
+            "km² que he robado (total)",
+            "km² que me han robado (total)",
+        ]],
+        use_container_width=True,
+    )
+  else:
+    st.info("Aún no se han registrado rutas en la campaña.")
 
 # -----------------------------------------------------------------------------
 # PESTAÑA 3: CLASIFICACIÓN SEMANAL
