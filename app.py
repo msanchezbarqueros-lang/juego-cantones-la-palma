@@ -1124,28 +1124,34 @@ with tab_saqueados:
     st.info("Aún no se han registrado saqueos territoriales en la campaña.")
 
 # -----------------------------------------------------------------------------
-# PESTAÑA 5: MENCEYES POR CANTÓN
+# PESTAÑA: MENCEYES POR CANTÓN (EN km²)
 # -----------------------------------------------------------------------------
 with tab4:
-    st.write("### 👑 Menceyes y Señoríos por Cantón")
-    df_cantones = calcular_ranking_detallado_por_canton(dominios_utm, cantones_gdf)
-    
-    if not df_cantones.empty:
-        cantones_conquistados = df_cantones["Cantón"].unique()
-        
-        st.write("#### 🤴 Menceyes Actuales")
-        cols = st.columns(3)
-        for i, cant in enumerate(cantones_conquistados):
-          df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(
-              by="Superficie (m²)", ascending=False
-          )
-          lider = df_sub.iloc[0]
-          al_nombre = lider["Alumno/a"]
-          perf = ESTUDIANTES.get(al_nombre, {"escudo": "👑"})
+  st.write("### 👑 Menceyes y Señoríos por Cantón")
+  df_cantones = calcular_ranking_detallado_por_canton(
+      dominios_utm, cantones_gdf
+  )
 
-          with cols[i % 3]:
-            st.markdown(
-                f"""
+  if not df_cantones.empty:
+    # Calculamos la superficie en km² a partir de los m² (1 km² = 1.000.000 m²)
+    df_cantones["Superficie (km²)"] = (
+        df_cantones["Superficie (m²)"] / 1_000_000.0
+    ).round(4)
+    cantones_conquistados = df_cantones["Cantón"].unique()
+
+    st.write("#### 🤴 Menceyes Actuales")
+    cols = st.columns(3)
+    for i, cant in enumerate(cantones_conquistados):
+      df_sub = df_cantones[df_cantones["Cantón"] == cant].sort_values(
+          by="Superficie (m²)", ascending=False
+      )
+      lider = df_sub.iloc[0]
+      al_nombre = lider["Alumno/a"]
+      perf = ESTUDIANTES.get(al_nombre, {"escudo": "👑"})
+
+      with cols[i % 3]:
+        st.markdown(
+            f"""
                     <div style="
                         background-color: #1e293b;
                         border: 1px solid #334155;
@@ -1162,26 +1168,33 @@ with tab4:
                             {perf['escudo']} {al_nombre}
                         </div>
                         <div style="font-size: 12.5px; font-weight: 600; color: #34d399;">
-                            ▲ {lider['Hectáreas (ha)']} ha ({lider['% Conquistado del Cantón']}% del cantón)
+                            ▲ {lider['Superficie (km²)']} km² ({lider['% Conquistado del Cantón']}% del cantón)
                         </div>
                     </div>
                     """,
-                unsafe_allow_html=True,
-            )
-                
-        st.markdown("---")
-        
-        canton_sel = st.selectbox("🔎 Inspeccionar Cantón:", cantones_conquistados)
-        df_canton_especifico = df_cantones[df_cantones["Cantón"] == canton_sel].sort_values(by="Superficie (m²)", ascending=False)
-        df_canton_especifico.index = range(1, len(df_canton_especifico) + 1)
-        
-        st.write(f"### Disputa Territorial en **{canton_sel}**")
-        st.dataframe(
-            df_canton_especifico[["Alumno/a", "Hectáreas (ha)", "% Conquistado del Cantón", "Superficie (m²)"]],
-            use_container_width=True
+            unsafe_allow_html=True,
         )
-    else:
-        st.info("Ningún cantón ha sido conquistado todavía.")
+
+    st.markdown("---")
+
+    canton_sel = st.selectbox("🔎 Inspeccionar Cantón:", cantones_conquistados)
+    df_canton_especifico = df_cantones[
+        df_cantones["Cantón"] == canton_sel
+    ].sort_values(by="Superficie (m²)", ascending=False)
+    df_canton_especifico.index = range(1, len(df_canton_especifico) + 1)
+
+    st.write(f"### Disputa Territorial en **{canton_sel}**")
+    st.dataframe(
+        df_canton_especifico[[
+            "Alumno/a",
+            "Superficie (km²)",
+            "% Conquistado del Cantón",
+            "Superficie (m²)",
+        ]],
+        use_container_width=True,
+    )
+  else:
+    st.info("Ningún cantón ha sido conquistado todavía.")
 
 # -----------------------------------------------------------------------------
 # PESTAÑA 6: LIBRO DE GUERRA
