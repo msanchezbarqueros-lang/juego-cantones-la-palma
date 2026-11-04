@@ -1197,28 +1197,55 @@ with tab4:
     st.info("Ningún cantón ha sido conquistado todavía.")
 
 # -----------------------------------------------------------------------------
-# PESTAÑA 6: LIBRO DE GUERRA
+# PESTAÑA: LIBRO DE GUERRA (EN km²)
 # -----------------------------------------------------------------------------
 with tab5:
-    st.write("### 📜 Libro de Guerra y Registro de Incursiones")
-    
-    if historial_robos_list:
-        rows_html = ""
-        for h in historial_robos_list:
-            al = h['alumno']
-            perf = ESTUDIANTES.get(al, {"escudo": "🛡️"})
-            rows_html += f"""
+  st.write("### 📜 Libro de Guerra y Registro de Incursiones")
+
+  if historial_robos_list:
+    import re  # Para convertir automáticamente cualquier cifra en ha a km²
+
+    rows_html = ""
+    for h in historial_robos_list:
+      al = h["alumno"]
+      perf = ESTUDIANTES.get(al, {"escudo": "🛡️"})
+
+      # Convertimos cualquier mención de hectáreas (ha) a kilómetros cuadrados (km²)
+      texto_robos = str(h.get("robos", ""))
+
+      # Función para detectar números seguidos de 'ha' y convertirlos a km² (dividiendo por 100)
+      def ha_a_km2(match):
+        val_ha = float(match.group(1).replace(",", "."))
+        val_km2 = round(val_ha / 100.0, 4)
+        return f"{val_km2} km²"
+
+      # Reemplaza patrones como "12.5 ha" o "0.85ha" por su equivalente en km²
+      texto_robos_km2 = re.sub(
+          r"(\d+(?:[\.,]\d+)?)\s*(?:ha|hect[aá]reas)",
+          ha_a_km2,
+          texto_robos,
+          flags=re.IGNORECASE,
+      )
+
+      # Si quedara alguna mención suelta a 'ha', la adaptamos
+      texto_robos_km2 = (
+          texto_robos_km2.replace(" ha", " km²").replace("ha", "km²")
+          if "km²" not in texto_robos_km2
+          else texto_robos_km2
+      )
+
+      rows_html += f"""
             <tr style="border-bottom: 1px solid #cbd5e1; background-color: #ffffff;">
                 <td style="padding: 12px; color: #111111; font-weight: 700;">{h['fecha']}</td>
                 <td style="padding: 12px; color: #111111; font-weight: 800; font-size: 1.05rem;">{perf['escudo']} {al}</td>
                 <td style="padding: 12px; color: #0f172a; font-weight: 600;">{h['cantones']}</td>
-                <td style="padding: 12px; color: #111111; font-weight: 600;">{h['robos']}</td>
+                <td style="padding: 12px; color: #dc2626; font-weight: 700;">{texto_robos_km2}</td>
                 <td style="padding: 12px; color: #334155; font-weight: 600;">{h['tipo']}</td>
                 <td style="padding: 12px; color: #0284c7; font-family: monospace; font-size: 0.9rem;">{h['archivo']}</td>
             </tr>
             """
-            
-        tabla_completa_html = f"""
+
+    tabla_completa_html = f"""
         <div style="
             background-color: #ffffff;
             border: 2px solid #ffd700;
@@ -1228,13 +1255,13 @@ with tab5:
             max-height: 520px;
             overflow-y: auto;
         ">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Outfit', sans-serif;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                 <thead>
                     <tr style="background-color: #161b22; color: #ffd700; border-bottom: 2px solid #ffd700; position: sticky; top: 0; z-index: 10;">
                         <th style="padding: 12px;">📅 Fecha/Hora</th>
                         <th style="padding: 12px;">👑 Conquistador/a</th>
                         <th style="padding: 12px;">📍 Cantón / Cantones</th>
-                        <th style="padding: 12px;">⚔️ Territorio Robado</th>
+                        <th style="padding: 12px;">⚔️ Territorio Robado (km²)</th>
                         <th style="padding: 12px;">🚩 Tipo de Ruta</th>
                         <th style="padding: 12px;">📁 Archivo GPX</th>
                     </tr>
@@ -1245,6 +1272,6 @@ with tab5:
             </table>
         </div>
         """
-        components.html(tabla_completa_html, height=540)
-    else:
-        st.info("El historial de incursiones de guerra está limpio.")
+    components.html(tabla_completa_html, height=540)
+  else:
+    st.info("El historial de incursiones de guerra está limpio.")
