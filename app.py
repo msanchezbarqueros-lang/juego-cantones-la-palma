@@ -169,33 +169,60 @@ st.markdown("""
         font-weight: bold !important;
     }
 
-    /* Pestañas (Tabs) */
+    /* Pestañas (Tabs) - Contenedor general */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
+        gap: 10px;
         background-color: #161b22;
-        padding: 12px;
+        padding: 10px;
         border-radius: 10px;
         border: 1px solid #30363d;
     }
+
+    /* Pestaña Inactiva (Botón base) */
     .stTabs [data-baseweb="tab"] {
         background-color: #21262d !important;
+        border: 1px solid #30363d !important;
         border-radius: 8px !important;
-        padding: 10px 20px !important;
-    }
-    .stTabs [data-baseweb="tab"] p, .stTabs [data-baseweb="tab"] span {
-        color: #ffffff !important;
-        font-family: 'Cinzel', serif !important;
+        padding: 10px 18px !important;
+        color: #f8fafc !important; /* Blanco puro base */
+        font-family: 'Cinzel', serif, sans-serif !important;
         font-weight: 700 !important;
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
+        transition: all 0.2s ease-in-out !important;
     }
+
+    /* Forzar el color blanco en TODOS los elementos internos de la pestaña inactiva */
+    .stTabs [data-baseweb="tab"] * {
+        color: #f8fafc !important;
+        font-family: 'Cinzel', serif, sans-serif !important;
+        font-weight: 700 !important;
+    }
+
+    /* Efecto al pasar el cursor (Hover) */
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #30363d !important;
+        border-color: #ffd700 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover * {
+        color: #ffd700 !important; /* Texto dorado al pasar el ratón */
+    }
+
+    /* Pestaña Activa / Seleccionada */
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #ffd700 0%, #ffae00 100%) !important;
         border: 1px solid #ffffff !important;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6) !important;
+        box-shadow: 0 0 14px rgba(255, 215, 0, 0.6) !important;
     }
-    .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+
+    /* Texto oscuro de máximo contraste en la pestaña activa */
+    .stTabs [aria-selected="true"] * {
         color: #0d1117 !important;
         font-weight: 900 !important;
+    }
+
+    /* Eliminar la línea roja/subrayado por defecto de Streamlit */
+    .stTabs [data-baseweb="tab-highlight"] {
+        background-color: transparent !important;
     }
 
     /* Tarjetas de Métricas (Menceyes) */
