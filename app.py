@@ -16,7 +16,7 @@ from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 # =============================================================================
 # CONEXIÓN CON GOOGLE DRIVE (PERSISTENCIA NUBE)
 # =============================================================================
-SCOPES = ['[suspicious link removed]]
+SCOPES = ['[suspicious link removed]']
 creds_dict = dict(st.secrets['gcp_service_account'])
 creds = service_account.Credentials.from_service_account_info(
     creds_dict, scopes=SCOPES
