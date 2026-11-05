@@ -84,6 +84,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# =============================================================================
+# INICIALIZACIÓN OBLIGATORIA DEL ESTADO DE SESIÓN
+# =============================================================================
+if "actividades" not in st.session_state or st.session_state.actividades is None:
+  try:
+    st.session_state.actividades = cargar_actividades_persistentes()
+  except Exception:
+    st.session_state.actividades = []
+
+# Doble seguro: si devolvió None o algo no iterable, forzamos lista vacía
+if not isinstance(st.session_state.actividades, list):
+  st.session_state.actividades = []
+
 # Estilo CSS Oscuro con Rediseño de Alto Contraste para los Controles del Profesor
 st.markdown("""
 <style>
@@ -780,7 +793,8 @@ with tab1:
             ).add_to(m)
 
     # MARCADORES DE ESCUDO PARA CADA RUTA REALIZADA
-    for act in st.session_state.actividades:
+    actividades = st.session_state.get("actividades", [])
+    for act in actividades:
         al = act['alumno']
         perf = ESTUDIANTES.get(al, {"escudo": "🛡️", "color": "#00E5FF"})
         color = perf["color"]
