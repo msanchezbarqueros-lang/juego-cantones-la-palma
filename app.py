@@ -608,7 +608,7 @@ else:
 def calcular_dominios_actuales():
     dominios = {}
     actividades = st.session_state.get("actividades", [])
-```python
+   python
   actividades = st.session_state.get("actividades", [])
   for act in actividades:
         alumno = act['alumno']
