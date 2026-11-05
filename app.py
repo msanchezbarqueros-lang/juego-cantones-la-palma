@@ -632,7 +632,8 @@ def calcular_estadisticas_robos_globales():
     historial_robos = []
     cantones_utm = cargar_cantones_la_palma().to_crs("EPSG:32628")
     
-    for act in st.session_state.actividades:
+    actividades = st.session_state.get("actividades", [])
+    for act in actividades:
         atractor = act['alumno']
         nueva_geom = act['geometria_utm']
         
