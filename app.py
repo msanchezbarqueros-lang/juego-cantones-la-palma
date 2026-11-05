@@ -14,62 +14,62 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 
 # =============================================================================
-   # CONEXIÓN CON GOOGLE DRIVE (PERSISTENCIA NUBE)
-   # =============================================================================
-   SCOPES = ["[suspicious link removed]"]
-   creds_dict = dict(st.secrets["gcp_service_account"])
-   creds = service_account.Credentials.from_service_account_info(
-       creds_dict, scopes=SCOPES
-   )
-   drive_service = build("drive", "v3", credentials=creds)
-   FOLDER_ID = st.secrets["drive"]["folder_id"]
-   NOMBRE_ARCHIVO_DRIVE = "actividades_campana.json"
+# CONEXIÓN CON GOOGLE DRIVE (PERSISTENCIA NUBE)
+# =============================================================================
+SCOPES = ['[suspicious link removed]]
+creds_dict = dict(st.secrets['gcp_service_account'])
+creds = service_account.Credentials.from_service_account_info(
+    creds_dict, scopes=SCOPES
+)
+drive_service = build('drive', 'v3', credentials=creds)
+FOLDER_ID = st.secrets['drive']['folder_id']
+NOMBRE_ARCHIVO_DRIVE = 'actividades_campana.json'
 
 
-   def buscar_archivo_id():
-     query = (
-         f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
-         " trashed = false"
-     )
-     results = (
-         drive_service.files()
-         .list(q=query, spaces="drive", fields="files(id, name)")
-         .execute()
-     )
-     archivos = results.get("files", [])
-     return archivos[0]["id"] if archivos else None
+def buscar_archivo_id():
+  query = (
+      f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
+      " trashed = false"
+  )
+  results = (
+      drive_service.files()
+      .list(q=query, spaces='drive', fields='files(id, name)')
+      .execute()
+  )
+  archivos = results.get('files', [])
+  return archivos[0]['id'] if archivos else None
 
 
-   def cargar_actividades_desde_drive():
-     file_id = buscar_archivo_id()
-     if not file_id:
-       return []
-     request = drive_service.files().get_media(fileId=file_id)
-     fh = io.BytesIO()
-     downloader = MediaIoBaseDownload(fh, request)
-     done = False
-     while not done:
-       status, done = downloader.next_chunk()
-     fh.seek(0)
-     contenido = fh.read().decode("utf-8")
-     return json.loads(contenido)
+def cargar_actividades_desde_drive():
+  file_id = buscar_archivo_id()
+  if not file_id:
+    return []
+  request = drive_service.files().get_media(fileId=file_id)
+  fh = io.BytesIO()
+  downloader = MediaIoBaseDownload(fh, request)
+  done = False
+  while not done:
+    status, done = downloader.next_chunk()
+  fh.seek(0)
+  contenido = fh.read().decode('utf-8')
+  return json.loads(contenido)
 
 
-   def guardar_actividades_en_drive(lista_actividades):
-     file_id = buscar_archivo_id()
-     contenido_json = json.dumps(
-         lista_actividades, ensure_ascii=False, indent=2, default=str
-     )
-     media = MediaIoBaseUpload(
-         io.BytesIO(contenido_json.encode("utf-8")),
-         mimetype="application/json",
-         resumable=True,
-     )
-     if file_id:
-       drive_service.files().update(fileId=file_id, media_body=media).execute()
-     else:
-       metadata = {"name": NOMBRE_ARCHIVO_DRIVE, "parents": [FOLDER_ID]}
-       drive_service.files().create(body=metadata, media_body=media).execute()
+def guardar_actividades_en_drive(lista_actividades):
+  file_id = buscar_archivo_id()
+  contenido_json = json.dumps(
+      lista_actividades, ensure_ascii=False, indent=2, default=str
+  )
+  media = MediaIoBaseUpload(
+      io.BytesIO(contenido_json.encode('utf-8')),
+      mimetype='application/json',
+      resumable=True,
+  )
+  if file_id:
+    drive_service.files().update(fileId=file_id, media_body=media).execute()
+  else:
+    metadata = {'name': NOMBRE_ARCHIVO_DRIVE, 'parents': [FOLDER_ID]}
+    drive_service.files().create(body=metadata, media_body=media).execute()
 
 # -----------------------------------------------------------------------------
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILO ÉPICO TÁCTICO "BEN AHOARE"
