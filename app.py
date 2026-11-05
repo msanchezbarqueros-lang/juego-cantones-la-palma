@@ -606,7 +606,8 @@ else:
 # 7. CÁLCULO DE SOLAPAMIENTOS, RE-CONQUISTAS Y ESTADÍSTICAS GLOBALES DE ROBOS DE TERRITORIO
 # -----------------------------------------------------------------------------------------
 def calcular_dominios_actuales():
-    dominios = {}
+    dominios = (
+    {}
     actividades = st.session_state.get("actividades", [])
 def calcular_dominios_actuales():
     actividades = st.session_state.get("actividades", [])
