@@ -3,3 +3,5 @@ folium
 geopandas
 shapely
 pandas
+google-api-python-client
+google-auth
