@@ -8,6 +8,68 @@ import streamlit.components.v1 as components
 import shapely.geometry as sg
 import geopandas as gpd
 import pandas as pd
+import io
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
+
+# =============================================================================
+   # CONEXIÓN CON GOOGLE DRIVE (PERSISTENCIA NUBE)
+   # =============================================================================
+   SCOPES = ["[suspicious link removed]"]
+   creds_dict = dict(st.secrets["gcp_service_account"])
+   creds = service_account.Credentials.from_service_account_info(
+       creds_dict, scopes=SCOPES
+   )
+   drive_service = build("drive", "v3", credentials=creds)
+   FOLDER_ID = st.secrets["drive"]["folder_id"]
+   NOMBRE_ARCHIVO_DRIVE = "actividades_campana.json"
+
+
+   def buscar_archivo_id():
+     query = (
+         f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
+         " trashed = false"
+     )
+     results = (
+         drive_service.files()
+         .list(q=query, spaces="drive", fields="files(id, name)")
+         .execute()
+     )
+     archivos = results.get("files", [])
+     return archivos[0]["id"] if archivos else None
+
+
+   def cargar_actividades_desde_drive():
+     file_id = buscar_archivo_id()
+     if not file_id:
+       return []
+     request = drive_service.files().get_media(fileId=file_id)
+     fh = io.BytesIO()
+     downloader = MediaIoBaseDownload(fh, request)
+     done = False
+     while not done:
+       status, done = downloader.next_chunk()
+     fh.seek(0)
+     contenido = fh.read().decode("utf-8")
+     return json.loads(contenido)
+
+
+   def guardar_actividades_en_drive(lista_actividades):
+     file_id = buscar_archivo_id()
+     contenido_json = json.dumps(
+         lista_actividades, ensure_ascii=False, indent=2, default=str
+     )
+     media = MediaIoBaseUpload(
+         io.BytesIO(contenido_json.encode("utf-8")),
+         mimetype="application/json",
+         resumable=True,
+     )
+     if file_id:
+       drive_service.files().update(fileId=file_id, media_body=media).execute()
+     else:
+       metadata = {"name": NOMBRE_ARCHIVO_DRIVE, "parents": [FOLDER_ID]}
+       drive_service.files().create(body=metadata, media_body=media).execute()
 
 # -----------------------------------------------------------------------------
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILO ÉPICO TÁCTICO "BEN AHOARE"
@@ -388,46 +450,42 @@ def extraer_puntos_gpx(archivo_gpx):
     return puntos
 
 def cargar_actividades_persistentes():
-    if not os.path.exists(DATA_FILE):
-        return []
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        actividades = []
-        for item in data:
-            puntos = item.get("puntos", [])
-            fecha = datetime.strptime(item["fecha"], "%Y-%m-%d %H:%M")
-            if puntos:
-                geom, tipo, geom_linea = procesar_puntos_gpx(puntos)
-                if geom is not None:
-                    actividades.append({
-                        'alumno': item['alumno'],
-                        'fecha': fecha,
-                        'geometria_utm': geom,
-                        'geometria_linea_utm': geom_linea,
-                        'tipo': tipo,
-                        'archivo': item.get('archivo', 'actividad.gpx'),
-                        'puntos': puntos
-                    })
-        actividades.sort(key=lambda x: x['fecha'])
-        return actividades
-    except Exception:
-        return []
+  try:
+    data = cargar_actividades_desde_drive()
+    if not data:
+      return []
+    actividades = []
+    for item in data:
+      puntos = item.get("puntos", [])
+      fecha = datetime.strptime(item["fecha"], "%Y-%m-%d %H:%M")
+      if puntos:
+        geom, tipo, geom_linea = procesar_puntos_gpx(puntos)
+        if geom is not None:
+          actividades.append({
+              "alumno": item["alumno"],
+              "fecha": fecha,
+              "geometria_utm": geom,
+              "geometria_linea_utm": geom_linea,
+              "tipo": tipo,
+              "archivo": item.get("archivo", "actividad.gpx"),
+              "puntos": puntos,
+          })
+    actividades.sort(key=lambda x: x["fecha"])
+    return actividades
+  except Exception:
+    return []
+
 
 def guardar_actividades_persistentes(actividades):
-    data = []
-    for act in actividades:
-        data.append({
-            'alumno': act['alumno'],
-            'fecha': act['fecha'].strftime("%Y-%m-%d %H:%M"),
-            'archivo': act.get('archivo', 'actividad.gpx'),
-            'puntos': act.get('puntos', [])
-        })
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-if 'actividades' not in st.session_state:
-    st.session_state.actividades = cargar_actividades_persistentes()
+  data = []
+  for act in actividades:
+    data.append({
+        "alumno": act["alumno"],
+        "fecha": act["fecha"].strftime("%Y-%m-%d %H:%M"),
+        "archivo": act.get("archivo", "actividad.gpx"),
+        "puntos": act.get("puntos", []),
+    })
+  guardar_actividades_en_drive(data)
 
 # -----------------------------------------------------------------------------
 # 6. BARRA LATERAL (CONTROL DOCENTE PROTEGIDO CON PASSWORD)
