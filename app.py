@@ -41,18 +41,21 @@ def buscar_archivo_id():
 
 
 def cargar_actividades_desde_drive():
-  file_id = buscar_archivo_id()
-  if not file_id:
+  try:
+    file_id = buscar_archivo_id()
+    if not file_id:
+      return []
+    request = drive_service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+      status, done = downloader.next_chunk()
+    fh.seek(0)
+    contenido = fh.read().decode("utf-8")
+    return json.loads(contenido)
+  except Exception as e:
     return []
-  request = drive_service.files().get_media(fileId=file_id)
-  fh = io.BytesIO()
-  downloader = MediaIoBaseDownload(fh, request)
-  done = False
-  while not done:
-    status, done = downloader.next_chunk()
-  fh.seek(0)
-  contenido = fh.read().decode('utf-8')
-  return json.loads(contenido)
 
 
 def guardar_actividades_en_drive(lista_actividades):
@@ -604,7 +607,10 @@ else:
 # -----------------------------------------------------------------------------------------
 def calcular_dominios_actuales():
     dominios = {}
-    for act in st.session_state.actividades:
+    actividades = st.session_state.get("actividades", [])
+```python
+  actividades = st.session_state.get("actividades", [])
+  for act in actividades:
         alumno = act['alumno']
         nueva_geom = act['geometria_utm']
         
