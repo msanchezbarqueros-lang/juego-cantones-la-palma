@@ -540,45 +540,96 @@ if pwd_input == PASSWORD_DOCENTE:
     st.sidebar.success("🔓 Modo Profesor Activo")
     st.sidebar.markdown("---")
     st.sidebar.subheader("📤 Registrar Incursión GPX")
-    
-    alumno_sel = st.sidebar.selectbox("Seleccionar Alumno/a", list(ESTUDIANTES.keys()))
-    info_est = ESTUDIANTES[alumno_sel]
-    
-    st.sidebar.info(f"**Escudo:** {info_est['escudo']} {info_est['titulo']}  \n**Color:** {info_est['color']}")
-    
-    fecha_ruta = st.sidebar.date_input("Fecha de la Ruta", value=datetime.now())
-    hora_ruta = st.sidebar.time_input("Hora de la Ruta", value=datetime.now().time())
+
+    # 1. Colocamos el selector de archivo arriba del todo
     archivo_gpx = st.sidebar.file_uploader("Subir archivo .gpx", type=["gpx"])
-    
+
+    # Valores por defecto iniciales
+    alumno_detectado = None
+    fecha_defecto = datetime.now().date()
+    hora_defecto = datetime.now().time()
+    deteccion_exitosa = False
+
+    # 2. Si se ha subido un archivo, analizamos su nombre: Nombre_Apellidos_DDMMAAAA_HHMM.gpx
+    if archivo_gpx is not None:
+      nombre_limpio = archivo_gpx.name.rsplit(".", 1)[
+          0
+      ]  # Quitamos la extensión .gpx
+      partes = nombre_limpio.split("_")
+
+      if len(partes) >= 3:
+        # A) Detección del Alumno (primera parte)
+        nombre_extraido = partes.strip().lower()
+        for k in ESTUDIANTES.keys():
+          if k.lower() == nombre_extraido or nombre_extraido in k.lower():
+            alumno_detectado = k
+            break
+
+        # B) Detección de Fecha (penúltima parte) y Hora (última parte)
+        fecha_str = partes[-2].strip()  # DDMMAAAA
+        hora_str = partes[-1].strip()  # HHMM
+        try:
+          dt_detectado = datetime.strptime(
+              f"{fecha_str}_{hora_str}", "%d%m%Y_%H%M"
+          )
+          fecha_defecto = dt_detectado.date()
+          hora_defecto = dt_detectado.time()
+          deteccion_exitosa = True
+        except Exception:
+          # Si el formato de hora/fecha no encaja, conserva la fecha actual
+          pass
+
+    # 3. Índice en el desplegable (si lo detectó, lo preselecciona automáticamente)
+    lista_alumnos = list(ESTUDIANTES.keys())
+    idx_alumno = (
+        lista_alumnos.index(alumno_detectado)
+        if alumno_detectado in lista_alumnos
+        else 0
+    )
+
+    if deteccion_exitosa and alumno_detectado:
+      st.sidebar.success(
+          f"🎯 **Detectado:** {alumno_detectado} |"
+          f" {fecha_defecto.strftime('%d/%m/%Y')} {hora_defecto.strftime('%H:%M')}"
+      )
+
+    # 4. Controles (con los datos pre-rellenados automáticamente)
+    alumno_sel = st.sidebar.selectbox(
+        "Alumno/a Conquistador/a", lista_alumnos, index=idx_alumno
+    )
+    info_est = ESTUDIANTES[alumno_sel]
+    st.sidebar.info(
+        f"**Escudo:** {info_est['escudo']} {info_est['titulo']}  \n**Color:**"
+        f" {info_est['color']}"
+    )
+
+    fecha_ruta = st.sidebar.date_input("Fecha de la Ruta", value=fecha_defecto)
+    hora_ruta = st.sidebar.time_input("Hora de la Ruta", value=hora_defecto)
+
+    # 5. Botón de Conquista
     if st.sidebar.button("⚡ CONQUISTAR TERRITORIO"):
-        if archivo_gpx is not None:
-            fecha_completa = datetime.combine(fecha_ruta, hora_ruta)
-            puntos = extraer_puntos_gpx(archivo_gpx)
-            geom, tipo, geom_linea = procesar_puntos_gpx(puntos)
-            
-            if geom is not None:
-                st.session_state.actividades.append({
-                    "alumno": alumno_sel,
-                    "fecha": fecha_completa,
-                    "geometria_utm": geom,
-                    "geometria_linea_utm": geom_linea,
-                    "tipo": tipo,
-                    "archivo": archivo_gpx.name,
-                    "puntos": puntos,
-                })
-                st.session_state.actividades.sort(key=lambda x: x["fecha"])
-                guardado_ok = guardar_actividades_persistentes(
-                    st.session_state.actividades
-                )
-                if guardado_ok:
-                  st.sidebar.success(f"¡Ruta de {alumno_sel} registrada!")
-                  st.rerun()
-                else:
-                  st.sidebar.error("Hubo un fallo al sincronizar con Google Drive.")
-            else:
-                st.sidebar.error("Archivo GPX sin datos válidos.")
+      if archivo_gpx is not None:
+        fecha_completa = datetime.combine(fecha_ruta, hora_ruta)
+        puntos = extraer_puntos_gpx(archivo_gpx)
+        geom, tipo, geom_linea = procesar_puntos_gpx(puntos)
+        if geom is not None:
+          st.session_state.actividades.append({
+              "alumno": alumno_sel,
+              "fecha": fecha_completa,
+              "geometria_utm": geom,
+              "geometria_linea_utm": geom_linea,
+              "tipo": tipo,
+              "archivo": archivo_gpx.name,
+              "puntos": puntos,
+          })
+          st.session_state.actividades.sort(key=lambda x: x["fecha"])
+          guardar_actividades_persistentes(st.session_state.actividades)
+          st.sidebar.success(f"¡Ruta de {alumno_sel} registrada!")
+          st.rerun()
         else:
-            st.sidebar.warning("Selecciona un archivo GPX.")
+          st.sidebar.error("Archivo GPX sin datos válidos.")
+      else:
+        st.sidebar.warning("Selecciona un archivo GPX.")
             
     st.sidebar.markdown("---")
         # =========================================================================
