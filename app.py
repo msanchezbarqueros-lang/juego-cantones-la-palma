@@ -25,7 +25,6 @@ drive_service = build('drive', 'v3', credentials=creds)
 FOLDER_ID = st.secrets['drive']['folder_id']
 NOMBRE_ARCHIVO_DRIVE = 'actividades_campana.json'
 
-
 def buscar_archivo_id():
   query = (
       f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
@@ -33,30 +32,17 @@ def buscar_archivo_id():
   )
   results = (
       drive_service.files()
-      .list(q=query, spaces='drive', fields='files(id, name)')
+      .list(
+          q=query,
+          spaces="drive",
+          fields="files(id, name)",
+          supportsAllDrives=True,
+          includeItemsFromAllDrives=True,
+      )
       .execute()
   )
-  archivos = results.get('files', [])
-  return archivos[0]['id'] if archivos else None
-
-
-def cargar_actividades_desde_drive():
-  try:
-    file_id = buscar_archivo_id()
-    if not file_id:
-      return []
-    request = drive_service.files().get_media(fileId=file_id)
-    fh = io.BytesIO()
-    downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while not done:
-      status, done = downloader.next_chunk()
-    fh.seek(0)
-    contenido = fh.read().decode("utf-8")
-    return json.loads(contenido)
-  except Exception as e:
-    return []
-
+  archivos = results.get("files", [])
+  return archivos[0]["id"] if archivos else None
 
 def guardar_actividades_en_drive(lista_actividades):
   file_id = buscar_archivo_id()
@@ -64,15 +50,19 @@ def guardar_actividades_en_drive(lista_actividades):
       lista_actividades, ensure_ascii=False, indent=2, default=str
   )
   media = MediaIoBaseUpload(
-      io.BytesIO(contenido_json.encode('utf-8')),
-      mimetype='application/json',
+      io.BytesIO(contenido_json.encode("utf-8")),
+      mimetype="application/json",
       resumable=True,
   )
   if file_id:
-    drive_service.files().update(fileId=file_id, media_body=media).execute()
+    drive_service.files().update(
+        fileId=file_id, media_body=media, supportsAllDrives=True
+    ).execute()
   else:
-    metadata = {'name': NOMBRE_ARCHIVO_DRIVE, 'parents': [FOLDER_ID]}
-    drive_service.files().create(body=metadata, media_body=media).execute()
+    metadata = {"name": NOMBRE_ARCHIVO_DRIVE, "parents": [FOLDER_ID]}
+    drive_service.files().create(
+        body=metadata, media_body=media, supportsAllDrives=True
+    ).execute()
 
 # -----------------------------------------------------------------------------
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILO ÉPICO TÁCTICO "BEN AHOARE"
@@ -83,19 +73,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-# =============================================================================
-# INICIALIZACIÓN OBLIGATORIA DEL ESTADO DE SESIÓN
-# =============================================================================
-if "actividades" not in st.session_state or st.session_state.actividades is None:
-  try:
-    st.session_state.actividades = cargar_actividades_persistentes()
-  except Exception:
-    st.session_state.actividades = []
-
-# Doble seguro: si devolvió None o algo no iterable, forzamos lista vacía
-if not isinstance(st.session_state.actividades, list):
-  st.session_state.actividades = []
 
 # Estilo CSS Oscuro con Rediseño de Alto Contraste para los Controles del Profesor
 st.markdown("""
@@ -429,41 +406,46 @@ def cargar_cantones_la_palma():
         return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
 
 # -----------------------------------------------------------------------------
-# 5. PROCESAMIENTO DE GPX Y PERSISTENCIA
+# 5. PROCESAMIENTO DE GPX Y PERSISTENCIA (GOOGLE DRIVE)
 # -----------------------------------------------------------------------------
+
+
 def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
-    if len(puntos) < 3:
-        return None, "Error: GPX con puntos insuficientes", None
-        
-    linea = sg.LineString(puntos)
-    gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs("EPSG:32628")
-    geom_utm = gdf_linea.geometry.iloc[0]
-    
-    p_inicio = sg.Point(geom_utm.coords[0])
-    p_fin = sg.Point(geom_utm.coords[-1])
-    
-    if p_inicio.distance(p_fin) <= max_dist_cierre_m:
-        poligono = sg.Polygon(geom_utm.coords)
-        if not poligono.is_valid:
-            poligono = poligono.buffer(0)
-        geom_conquista = poligono.buffer(5.0)
-        tipo = "⭕ Bucle Cerrado (Dominio Interior)"
-    else:
-        geom_conquista = geom_utm.buffer(franja_m)
-        tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
-        
-    return geom_conquista, tipo, geom_utm
+  if len(puntos) < 3:
+    return None, "Error: GPX con puntos insuficientes", None
+  linea = sg.LineString(puntos)
+  gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
+      "EPSG:32628"
+  )
+  geom_utm = gdf_linea.geometry.iloc
+
+  p_inicio = sg.Point(geom_utm.coords)
+  p_fin = sg.Point(geom_utm.coords[-1])
+
+  if p_inicio.distance(p_fin) <= max_dist_cierre_m:
+    poligono = sg.Polygon(geom_utm.coords)
+    if not poligono.is_valid:
+      poligono = poligono.buffer(0)
+    geom_conquista = poligono.buffer(5.0)
+    tipo = "⭕ Bucle Cerrado (Dominio Interior)"
+  else:
+    geom_conquista = geom_utm.buffer(franja_m)
+    tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
+
+  return geom_conquista, tipo, geom_utm
+
 
 def extraer_puntos_gpx(archivo_gpx):
-    tree = ET.parse(archivo_gpx)
-    root = tree.getroot()
-    puntos = []
-    for elem in root.iter():
-        if elem.tag.endswith('trkpt'):
-            lat = float(elem.attrib['lat'])
-            lon = float(elem.attrib['lon'])
-            puntos.append((lon, lat))
-    return puntos
+  tree = ET.parse(archivo_gpx)
+  root = tree.getroot()
+  puntos = []
+  for elem in root.iter():
+    if elem.tag.endswith("trkpt"):
+      lat = float(elem.attrib["lat"])
+      lon = float(elem.attrib["lon"])
+      puntos.append((lon, lat))
+  return puntos
+
 
 def cargar_actividades_persistentes():
   try:
@@ -488,20 +470,33 @@ def cargar_actividades_persistentes():
           })
     actividades.sort(key=lambda x: x["fecha"])
     return actividades
-  except Exception:
+  except Exception as e:
+    st.error(f"Error procesando actividades: {e}")
     return []
 
 
 def guardar_actividades_persistentes(actividades):
-  data = []
-  for act in actividades:
-    data.append({
-        "alumno": act["alumno"],
-        "fecha": act["fecha"].strftime("%Y-%m-%d %H:%M"),
-        "archivo": act.get("archivo", "actividad.gpx"),
-        "puntos": act.get("puntos", []),
-    })
-  guardar_actividades_en_drive(data)
+  try:
+    data = []
+    for act in actividades:
+      data.append({
+          "alumno": act["alumno"],
+          "fecha": act["fecha"].strftime("%Y-%m-%d %H:%M"),
+          "archivo": act.get("archivo", "actividad.gpx"),
+          "puntos": act.get("puntos", []),
+      })
+    guardar_actividades_en_drive(data)
+  except Exception as e:
+    st.sidebar.error(f"Error guardando en Google Drive: {e}")
+
+# =============================================================================
+# ✅ AQUÍ ES DONDE DEBE IR LA INICIALIZACIÓN (AHORA QUE YA EXISTEN LAS FUNCIONES)
+# =============================================================================
+if "actividades" not in st.session_state or st.session_state.actividades is None:
+  st.session_state.actividades = cargar_actividades_persistentes()
+
+if not isinstance(st.session_state.actividades, list):
+  st.session_state.actividades = []
 
 # -----------------------------------------------------------------------------
 # 6. BARRA LATERAL (CONTROL DOCENTE PROTEGIDO CON PASSWORD)
