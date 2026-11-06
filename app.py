@@ -585,20 +585,29 @@ if pwd_input == PASSWORD_DOCENTE:
     # 👇 NUEVO BLOQUE: GESTIÓN Y BORRADO INDIVIDUAL DE RUTAS GPX 👇
     # =========================================================================
     st.sidebar.subheader("🗑️ Eliminar Rutas Subidas")
-    
     if st.session_state.actividades:
         st.sidebar.caption(f"Rutas activas: {len(st.session_state.actividades)}")
-        
-        # Mostramos cada ruta con el nombre del alumno y un botón para borrarla
- for idx, act in enumerate(st.session_state.actividades):
-            alumno_nom = act.get("alumno", "Desconocido")
-            col_info, col_del = st.columns([0.8, 0.2])
-            with col_info:
-                st.caption(f"**{alumno_nom}** - {act['fecha'].strftime('%d/%m %H:%M')}")
-            if col_del.button("❌", key=f"del_act_{idx}", help=f"Borrar ruta de {alumno_nom}"):
+        for idx, act in enumerate(st.session_state.actividades):
+            col_info, col_del = st.sidebar.columns([3, 4])
+            alumno_nom = act.get('alumno', 'Desconocido')
+            nom_arch = act.get('archivo', f'Ruta {idx+1}')
+            col_info.markdown(
+                f"""
+                <div style="margin-bottom: 6px; line-height: 1.3;">
+                    <span style="color: #ffffff; font-weight: bold; font-size: 13.5px;">
+                        👤 {alumno_nom}
+                    </span><br>
+                    <span style="color: #93c5fd; font-size: 11.5px; word-break: break-all;">
+                        📄 {nom_arch}
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if col_del.button('❌', key=f'del_act_{idx}', help=f'Borrar ruta de {alumno_nom}'):
                 st.session_state.actividades.pop(idx)
                 guardar_actividades_persistentes(st.session_state.actividades)
-                st.sidebar.success(f"Ruta de {alumno_nom} eliminada.")
+                st.sidebar.success(f'Ruta de {alumno_nom} eliminada.')
                 st.rerun()
     else:
         st.sidebar.caption("No hay rutas registradas.")
