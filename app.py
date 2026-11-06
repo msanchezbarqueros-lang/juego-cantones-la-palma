@@ -25,6 +25,8 @@ drive_service = build('drive', 'v3', credentials=creds)
 FOLDER_ID = st.secrets['drive']['folder_id']
 NOMBRE_ARCHIVO_DRIVE = 'actividades_campana.json'
 
+
+# 1. FUNCIÓN PARA BUSCAR EL ARCHIVO EN LA CARPETA
 def buscar_archivo_id():
   query = (
       f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
@@ -34,24 +36,45 @@ def buscar_archivo_id():
       drive_service.files()
       .list(
           q=query,
-          spaces="drive",
-          fields="files(id, name)",
+          spaces='drive',
+          fields='files(id, name)',
           supportsAllDrives=True,
           includeItemsFromAllDrives=True,
       )
       .execute()
   )
-  archivos = results.get("files", [])
-  return archivos[0]["id"] if archivos else None
+  archivos = results.get('files', [])
+  return archivos['id'] if archivos else None
 
+
+# 2. FUNCIÓN PARA CARGAR (👈 ESTA ES LA QUE TE DICE QUE FALTA)
+def cargar_actividades_desde_drive():
+  try:
+    file_id = buscar_archivo_id()
+    if not file_id:
+      return []
+    request = drive_service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+      status, done = downloader.next_chunk()
+    fh.seek(0)
+    contenido = fh.read().decode('utf-8')
+    return json.loads(contenido)
+  except Exception as e:
+    return []
+
+
+# 3. FUNCIÓN PARA GUARDAR
 def guardar_actividades_en_drive(lista_actividades):
   file_id = buscar_archivo_id()
   contenido_json = json.dumps(
       lista_actividades, ensure_ascii=False, indent=2, default=str
   )
   media = MediaIoBaseUpload(
-      io.BytesIO(contenido_json.encode("utf-8")),
-      mimetype="application/json",
+      io.BytesIO(contenido_json.encode('utf-8')),
+      mimetype='application/json',
       resumable=True,
   )
   if file_id:
@@ -59,7 +82,7 @@ def guardar_actividades_en_drive(lista_actividades):
         fileId=file_id, media_body=media, supportsAllDrives=True
     ).execute()
   else:
-    metadata = {"name": NOMBRE_ARCHIVO_DRIVE, "parents": [FOLDER_ID]}
+    metadata = {'name': NOMBRE_ARCHIVO_DRIVE, 'parents': [FOLDER_ID]}
     drive_service.files().create(
         body=metadata, media_body=media, supportsAllDrives=True
     ).execute()
