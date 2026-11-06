@@ -16,7 +16,7 @@ from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 # =============================================================================
 # CONEXIÓN CON GOOGLE DRIVE (PERSISTENCIA NUBE)
 # =============================================================================
-SCOPES = ['[suspicious link removed]']
+SCOPES = ['https://www.googleapis.com/auth/drive']
 creds_dict = dict(st.secrets['gcp_service_account'])
 creds = service_account.Credentials.from_service_account_info(
     creds_dict, scopes=SCOPES
@@ -611,15 +611,6 @@ if pwd_input == PASSWORD_DOCENTE:
                 """,
               unsafe_allow_html=True,
           )
-
-          # Botón de borrado
-          if col_del.button(
-              '❌', key=f'del_act_{idx}', help=f'Borrar ruta de {alumno_nom}'
-          ):
-            st.session_state.actividades.pop(idx)
-            guardar_actividades_persistentes(st.session_state.actividades)
-            st.sidebar.success(f'Ruta de {alumno_nom} eliminada.')
-            st.rerun()
             
             # Botón de borrado individual
             if col_del.button("❌", key=f"del_act_{idx}", help=f"Borrar ruta de {alumno_nom}"):
