@@ -590,38 +590,16 @@ if pwd_input == PASSWORD_DOCENTE:
         st.sidebar.caption(f"Rutas activas: {len(st.session_state.actividades)}")
         
         # Mostramos cada ruta con el nombre del alumno y un botón para borrarla
-        for idx, act in enumerate(st.session_state.actividades):
-          # Damos un poco más de espacio al texto frente al botón (proporción 4 a 1)
-          col_info, col_del = st.sidebar.columns([4, 1])
-
-          alumno_nom = act.get('alumno', 'Desconocido')
-          nom_arch = act.get('archivo', f'Ruta {idx+1}')
-
-          # Renderizado en blanco y cian de alto contraste
-          col_info.markdown(
-              f"""
-                <div style="margin-bottom: 6px; line-height: 1.3;">
-                    <span style="color: #ffffff; font-weight: bold; font-size: 13.5px;">
-                        👤 {alumno_nom}
-                    </span><br>
-                    <span style="color: #93c5fd; font-size: 11.5px; word-break: break-all;">
-                        📄 {nom_arch}
-                    </span>
-                </div>
-                """,
-              unsafe_allow_html=True,
-          )
-            
-            # Botón de borrado individual
+ for idx, act in enumerate(st.session_state.actividades):
+            alumno_nom = act.get("alumno", "Desconocido")
+            col_info, col_del = st.columns([0.8, 0.2])
+            with col_info:
+                st.caption(f"**{alumno_nom}** - {act['fecha'].strftime('%d/%m %H:%M')}")
             if col_del.button("❌", key=f"del_act_{idx}", help=f"Borrar ruta de {alumno_nom}"):
-                # 1. Eliminamos solo esta actividad de la lista
                 st.session_state.actividades.pop(idx)
-                
-                # 2. Guardamos la lista actualizada en el archivo DATA_FILE
                 guardar_actividades_persistentes(st.session_state.actividades)
-                
                 st.sidebar.success(f"Ruta de {alumno_nom} eliminada.")
-                st.rerun()  # Recarga la página y actualiza el mapa al instante
+                st.rerun()
     else:
         st.sidebar.caption("No hay rutas registradas.")
     # =========================================================================
