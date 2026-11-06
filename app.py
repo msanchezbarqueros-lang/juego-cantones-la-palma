@@ -440,10 +440,10 @@ def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
   gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
       "EPSG:32628"
   )
-  geom_utm = gdf_linea.geometry.iloc  # Extrae la LineString pura
+  geom_utm = gdf_linea.geometry.iloc[0]
 
-  # Coordenadas inicial y final usando coords y coords[-1]
-  p_inicio = sg.Point(geom_utm.coords)
+  # Primer punto [0] y último punto [-1]
+  p_inicio = sg.Point(geom_utm.coords[0])
   p_fin = sg.Point(geom_utm.coords[-1])
 
   if p_inicio.distance(p_fin) <= max_dist_cierre_m:
