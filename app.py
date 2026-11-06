@@ -44,8 +44,8 @@ def buscar_archivo_id():
         .execute()
     )
     archivos = results.get("files", [])
-    # Corregido con  para acceder al primer archivo de la lista
-    return archivos["id"] if archivos else None
+    # Fíjate en el [0] antes de ['id']:
+    return archivos[0]["id"] if archivos else None
   except Exception as e:
     st.error(f"Error al buscar archivo en Drive: {e}")
     return None
