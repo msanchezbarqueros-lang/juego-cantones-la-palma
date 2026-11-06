@@ -25,29 +25,33 @@ drive_service = build('drive', 'v3', credentials=creds)
 FOLDER_ID = st.secrets['drive']['folder_id']
 NOMBRE_ARCHIVO_DRIVE = 'actividades_campana.json'
 
-
 # 1. FUNCIÓN PARA BUSCAR EL ARCHIVO EN LA CARPETA
 def buscar_archivo_id():
-  query = (
-      f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
-      " trashed = false"
-  )
-  results = (
-      drive_service.files()
-      .list(
-          q=query,
-          spaces='drive',
-          fields='files(id, name)',
-          supportsAllDrives=True,
-          includeItemsFromAllDrives=True,
-      )
-      .execute()
-  )
-  archivos = results.get('files', [])
-  return archivos['id'] if archivos else None
+  try:
+    query = (
+        f"'{FOLDER_ID}' in parents and name = '{NOMBRE_ARCHIVO_DRIVE}' and"
+        " trashed = false"
+    )
+    results = (
+        drive_service.files()
+        .list(
+            q=query,
+            spaces="drive",
+            fields="files(id, name)",
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
+        )
+        .execute()
+    )
+    archivos = results.get("files", [])
+    # Corregido con  para acceder al primer archivo de la lista
+    return archivos["id"] if archivos else None
+  except Exception as e:
+    st.error(f"Error al buscar archivo en Drive: {e}")
+    return None
 
 
-# 2. FUNCIÓN PARA CARGAR (👈 ESTA ES LA QUE TE DICE QUE FALTA)
+# 2. FUNCIÓN PARA CARGAR
 def cargar_actividades_desde_drive():
   try:
     file_id = buscar_archivo_id()
@@ -60,9 +64,10 @@ def cargar_actividades_desde_drive():
     while not done:
       status, done = downloader.next_chunk()
     fh.seek(0)
-    contenido = fh.read().decode('utf-8')
+    contenido = fh.read().decode("utf-8")
     return json.loads(contenido)
   except Exception as e:
+    st.error(f"Error al descargar datos de Google Drive: {e}")
     return []
 
 
@@ -73,8 +78,8 @@ def guardar_actividades_en_drive(lista_actividades):
       lista_actividades, ensure_ascii=False, indent=2, default=str
   )
   media = MediaIoBaseUpload(
-      io.BytesIO(contenido_json.encode('utf-8')),
-      mimetype='application/json',
+      io.BytesIO(contenido_json.encode("utf-8")),
+      mimetype="application/json",
       resumable=True,
   )
   if file_id:
@@ -82,7 +87,7 @@ def guardar_actividades_en_drive(lista_actividades):
         fileId=file_id, media_body=media, supportsAllDrives=True
     ).execute()
   else:
-    metadata = {'name': NOMBRE_ARCHIVO_DRIVE, 'parents': [FOLDER_ID]}
+    metadata = {"name": NOMBRE_ARCHIVO_DRIVE, "parents": [FOLDER_ID]}
     drive_service.files().create(
         body=metadata, media_body=media, supportsAllDrives=True
     ).execute()
@@ -510,8 +515,10 @@ def guardar_actividades_persistentes(actividades):
           "puntos": act.get("puntos", []),
       })
     guardar_actividades_en_drive(data)
+    return True
   except Exception as e:
-    st.sidebar.error(f"Error guardando en Google Drive: {e}")
+    st.error(f"Error guardando en Google Drive: {e}")
+    return False
 
 # =============================================================================
 # ✅ AQUÍ ES DONDE DEBE IR LA INICIALIZACIÓN (AHORA QUE YA EXISTEN LAS FUNCIONES)
@@ -551,18 +558,23 @@ if pwd_input == PASSWORD_DOCENTE:
             
             if geom is not None:
                 st.session_state.actividades.append({
-                    'alumno': alumno_sel,
-                    'fecha': fecha_completa,
-                    'geometria_utm': geom,
-                    'geometria_linea_utm': geom_linea,
-                    'tipo': tipo,
-                    'archivo': archivo_gpx.name,
-                    'puntos': puntos
+                    "alumno": alumno_sel,
+                    "fecha": fecha_completa,
+                    "geometria_utm": geom,
+                    "geometria_linea_utm": geom_linea,
+                    "tipo": tipo,
+                    "archivo": archivo_gpx.name,
+                    "puntos": puntos,
                 })
-                st.session_state.actividades.sort(key=lambda x: x['fecha'])
-                guardar_actividades_persistentes(st.session_state.actividades)
-                st.sidebar.success(f"¡Ruta de {alumno_sel} registrada!")
-                st.rerun()
+                st.session_state.actividades.sort(key=lambda x: x["fecha"])
+                guardado_ok = guardar_actividades_persistentes(
+                    st.session_state.actividades
+                )
+                if guardado_ok:
+                  st.sidebar.success(f"¡Ruta de {alumno_sel} registrada!")
+                  st.rerun()
+                else:
+                  st.sidebar.error("Hubo un fallo al sincronizar con Google Drive.")
             else:
                 st.sidebar.error("Archivo GPX sin datos válidos.")
         else:
