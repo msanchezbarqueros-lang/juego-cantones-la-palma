@@ -438,60 +438,66 @@ def cargar_cantones_la_palma():
 # -----------------------------------------------------------------------------
 
 
-def procesar_puntos_gpx(
-    puntos, max_dist_cierre_m=100.0, franja_m=30.0, min_area_bucle_m2=5000.0
-):
-  """Procesa los puntos GPX detectando si es:
+from shapely.ops import polygonize, unary_union
 
-  1. Bucle Cerrado Real (encierra una superficie real > 5.000 m²).
-  2. Línea de Incursión (tanto rutas de solo ida como de ida y vuelta sobre los
-  mismos pasos).
+
+def procesar_puntos_gpx(
+    puntos, franja_m=30.0, min_area_bucle_m2=5000.0, tolerancia_simpl_m=5.0
+):
+  """Procesa cualquier tipología de ruta GPX:
+
+  - Línea pura o Ida y Vuelta (A -> B -> A): Aplica franja de 30 m a todo el
+  recorrido.
+  - Bucle circular puro (A -> A): Conquista el dominio interior + franja.
+  - Ruta mixta en 'raqueta' / 'piruleta' (A -> B -> bucle -> B -> A):
+    Conquista el interior del bucle Y la franja de 30 m del tramo lineal.
   """
   if len(puntos) < 3:
     return None, "Error: GPX con puntos insuficientes", None
 
+  # 1. Crear la geometría UTM en metros (EPSG:32628 - Canarias)
   linea = sg.LineString(puntos)
   gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
       "EPSG:32628"
   )
-  geom_utm = gdf_linea.geometry.iloc[0]
+  geom_utm = gdf_linea.geometry.iloc
 
-  p_inicio = sg.Point(geom_utm.coords[0])
-  p_fin = sg.Point(geom_utm.coords[-1])
+  # 2. La franja base de 30 m cubre siempre todo el camino recorrido (incluyendo tramos de ida y vuelta)
+  buffer_linea = geom_utm.buffer(franja_m)
 
-  distancia_cierre = p_inicio.distance(p_fin)
+  # 3. Detección robusta de bucles interiores mediante 'polygonize'
+  # Simplificamos levemente la línea para evitar micro-cruces por ruido GPS
+  linea_simplificada = geom_utm.simplify(tolerancia_simpl_m)
 
-  # Comprobamos si potencialmente se cerró el recorrido
-  es_bucle_real = False
-  geom_conquista = None
-  tipo = ""
+  # Al hacer unary_union sobre las líneas o sus segmentos nodales, Shapely encuentra intersecciones reales
+  poligonos_detectados = list(polygonize(unary_union(linea_simplificada)))
 
-  if distancia_cierre <= max_dist_cierre_m:
-    # Intentamos crear el polígono interior
-    try:
-      # Usamos polygonize o un polígono limpio
-      poligono = sg.Polygon(geom_utm.coords)
-      if not poligono.is_valid:
-        poligono = poligono.buffer(0)
+  # Filtramos solo los polígonos que representen un área interior real (ej. > 5.000 m²)
+  bucles_validos = [
+      p
+      for p in poligonos_detectados
+      if p.is_valid and not p.is_empty and p.area >= min_area_bucle_m2
+  ]
 
-      # Un bucle real debe tener un área interior sustancial (ej. > 5.000 m² o medio campo de fútbol)
-      # Si es ida y vuelta sobre los mismos pasos, su área será cercana a 0.
-      if (
-          poligono.is_valid
-          and not poligono.is_empty
-          and poligono.area >= min_area_bucle_m2
-      ):
-        geom_conquista = poligono.buffer(5.0)
-        tipo = "⭕ Bucle Cerrado (Dominio Interior)"
-        es_bucle_real = True
-    except Exception:
-      es_bucle_real = False
+  if bucles_validos:
+    # Unimos todos los bucles interiores detectados (por si hace más de una vuelta)
+    interior_bucles = unary_union(bucles_validos).buffer(5.0)
 
-  # Si no fue un bucle cerrado real (o fue una ida y vuelta sobre los mismos pasos):
-  if not es_bucle_real:
-    # Se genera una franja de influencia (buffer) a lo largo de toda la línea
-    geom_conquista = geom_utm.buffer(franja_m)
-    if distancia_cierre <= max_dist_cierre_m:
+    # Fusionamos el interior del bucle con el pasillo de la línea completa
+    geom_conquista = unary_union([buffer_linea, interior_bucles])
+
+    p_inicio = sg.Point(geom_utm.coords)
+    p_fin = sg.Point(geom_utm.coords[-1])
+    if p_inicio.distance(p_fin) <= 100.0:
+      tipo = "⭕ Bucle con Aproximación / Raqueta (Interior + Pasillo)"
+    else:
+      tipo = "⭕ Incursión con Bucle Parcial"
+  else:
+    # No hay ningún bucle significativo: es una ruta lineal o ida y vuelta sobre los mismos pasos
+    geom_conquista = buffer_linea
+    p_inicio = sg.Point(geom_utm.coords)
+    p_fin = sg.Point(geom_utm.coords[-1])
+    if p_inicio.distance(p_fin) <= 100.0:
       tipo = f"🚩 Incursión Lineal (Ida y Vuelta) ({int(franja_m)}m)"
     else:
       tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
