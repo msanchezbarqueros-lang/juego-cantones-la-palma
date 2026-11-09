@@ -440,99 +440,102 @@ def cargar_cantones_la_palma():
 from shapely.ops import polygonize, unary_union
 
 
-def procesar_puntos_gpx(
-    puntos,
-    franja_m=30.0,
-    min_area_bucle_m2=3000.0,
-    max_dist_cierre_m=150.0,
-):
-  """Procesa el track GPX reconociendo el interior de bucles circulares,
+def procesar_puntos_gpx(puntos, franja_m=30.0, min_area_bucle_m2=2500.0, max_dist_cierre_m=200.0):
+    """
+    Procesa tracks GPX de cualquier tipo:
+    - Bucle circular / semicircular: conquista todo el dominio interior + pasillo.
+    - Raqueta / Mixta: conquista el bucle y mantiene la franja de aproximación.
+    - Línea pura o Ida y Vuelta: genera una franja de 30m protegiendo todo el sendero.
+    """
+    if len(puntos) < 3:
+        return None, "Error: GPX con puntos insuficientes", None
 
-  rutas en raqueta y franjas de 30m en tramos lineales o de ida y vuelta.
-  """
-  if len(puntos) < 3:
-    return None, "Error: GPX con puntos insuficientes", None
+    # 1. Geometría UTM proyectada a metros (EPSG:32628 - Canarias)
+    linea = sg.LineString(puntos)
+    gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs("EPSG:32628")
+    
+    # IMPORTANTE: Mantener el [0] para extraer la geometría
+    geom_utm = gdf_linea.geometry.iloc[0]
 
-  # 1. Geometría UTM proyectada en metros (EPSG:32628 - Canarias)
-  linea = sg.LineString(puntos)
-  gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
-      "EPSG:32628"
-  )
-  geom_utm = gdf_linea.geometry.iloc
+    # Pasillo de seguridad de 30 m para que las líneas de ida y vuelta nunca desaparezcan
+    buffer_linea = geom_utm.buffer(franja_m)
 
-  # Pasillo base de 30m que garantiza que ningún sendero de ida y vuelta se pierda
-  buffer_linea = geom_utm.buffer(franja_m)
+    coords = list(geom_utm.coords)
+    p_inicio = sg.Point(coords[0])
+    p_fin = sg.Point(coords[-1])
+    distancia_extremos = p_inicio.distance(p_fin)
 
-  p_inicio = sg.Point(geom_utm.coords)
-  p_fin = sg.Point(geom_utm.coords[-1])
-  distancia_extremos = p_inicio.distance(p_fin)
+    poligonos_conquistados = []
 
-  poligonos_conquista = []
-
-  # Simplificamos levemente el track (3 metros) para limpiar ruido de antena GPS
-  linea_limpia = geom_utm.simplify(3.0)
-
-  # CASO A: Si el inicio y el fin están cerca (<= 150m), cerramos la línea físicamente
-  lineas_a_procesar = [linea_limpia]
-  if distancia_extremos <= max_dist_cierre_m:
-    # Segmento de unión entre el punto final y el punto inicial
-    seg_cierre = sg.LineString([geom_utm.coords[-1], geom_utm.coords])
-    lineas_a_procesar.append(seg_cierre)
-
-  # Nodalizamos las líneas: unary_union corta la línea en cada punto donde se cruza
-  red_lineas = unary_union(lineas_a_procesar)
-
-  # Extraemos todos los recintos cerrados que se han formado
-  try:
-    caras_cerradas = list(polygonize(red_lineas))
-    for cara in caras_cerradas:
-      if cara.is_valid and not cara.is_empty and cara.area >= min_area_bucle_m2:
-        poligonos_conquista.append(cara)
-  except Exception:
-    pass
-
-  # Respaldo de seguridad si polygonize no halló caras pero los extremos estaban juntos
-  if not poligonos_conquista and distancia_extremos <= max_dist_cierre_m:
-    try:
-      coords_anillo = list(geom_utm.coords) + [geom_utm.coords]
-      poly_directo = sg.Polygon(coords_anillo)
-      if not poly_directo.is_valid:
-        # make_valid o buffer(0) para resolver auto-cruces en Shapely
+    # COMPROBACIÓN 1: El inicio y el fin están cerca (Bucle circular o semicircular <= 200 m)
+    if distancia_extremos <= max_dist_cierre_m:
         try:
-          from shapely.validation import make_valid
+            # Cerramos el anillo forzando que el último punto conecte con el primero
+            anillo_cerrado = coords + [coords[0]]
+            poly_candidato = sg.Polygon(anillo_cerrado)
+            
+            # Si tiene auto-intersecciones por el GPS, lo reparamos matemáticamente
+            if not poly_candidato.is_valid:
+                try:
+                    from shapely.validation import make_valid
+                    poly_reparado = make_valid(poly_candidato)
+                except ImportError:
+                    poly_reparado = poly_candidato.buffer(0)
+            else:
+                poly_reparado = poly_candidato
 
-          poly_directo = make_valid(poly_directo)
-        except ImportError:
-          poly_directo = poly_directo.buffer(0)
+            # Extraemos las partes poligonales resultantes
+            geoms_a_revisar = []
+            if poly_reparado.geom_type in ['Polygon', 'MultiPolygon']:
+                if poly_reparado.geom_type == 'Polygon':
+                    geoms_a_revisar = [poly_reparado]
+                else:
+                    geoms_a_revisar = list(poly_reparado.geoms)
+            elif poly_reparado.geom_type == 'GeometryCollection':
+                geoms_a_revisar = [g for g in poly_reparado.geoms if g.geom_type in ['Polygon', 'MultiPolygon']]
 
-      if (
-          poly_directo.is_valid
-          and not poly_directo.is_empty
-          and poly_directo.area >= min_area_bucle_m2
-      ):
-        poligonos_conquista.append(poly_directo)
-    except Exception:
-      pass
+            for g in geoms_a_revisar:
+                if g.geom_type == 'MultiPolygon':
+                    for sub_g in g.geoms:
+                        if sub_g.area >= min_area_bucle_m2:
+                            poligonos_conquistados.append(sub_g)
+                elif g.area >= min_area_bucle_m2:
+                    poligonos_conquistados.append(g)
+        except Exception:
+            pass
 
-  # 3. Ensamblaje final de la conquista
-  if poligonos_conquista:
-    interior_unido = unary_union(poligonos_conquista).buffer(5.0)
-    # Fusionamos el interior del bucle con el pasillo exterior
-    geom_conquista = unary_union([buffer_linea, interior_unido])
+    # COMPROBACIÓN 2: Rutas en raqueta o bucles interiores donde el inicio y fin están lejos
+    if not poligonos_conquistados:
+        try:
+            linea_simplificada = geom_utm.simplify(3.0)
+            from shapely.ops import polygonize, unary_union
+            lazos_detectados = list(polygonize(unary_union(linea_simplificada)))
+            for lazo in lazos_detectados:
+                if lazo.is_valid and not lazo.is_empty and lazo.area >= min_area_bucle_m2:
+                    poligonos_conquistados.append(lazo)
+        except Exception:
+            pass
 
-    if distancia_extremos <= max_dist_cierre_m:
-      tipo = "⭕ Bucle Cerrado (Dominio Interior)"
+    # 3. Construcción de la Geometría Final Conquistada
+    if poligonos_conquistados:
+        from shapely.ops import unary_union
+        interior_unido = unary_union(poligonos_conquistados).buffer(5.0)
+        # Se fusiona el interior con el pasillo exterior
+        geom_conquista = unary_union([buffer_linea, interior_unido])
+        
+        if distancia_extremos <= max_dist_cierre_m:
+            tipo = "⭕ Bucle Cerrado (Dominio Interior)"
+        else:
+            tipo = "⭕ Incursión con Bucle Parcial (Raqueta)"
     else:
-      tipo = "⭕ Incursión con Bucle Parcial (Raqueta)"
-  else:
-    # Ruta puramente lineal o ida y vuelta sobre los mismos pasos
-    geom_conquista = buffer_linea
-    if distancia_extremos <= max_dist_cierre_m:
-      tipo = f"🚩 Incursión Lineal (Ida y Vuelta) ({int(franja_m)}m)"
-    else:
-      tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
+        # Es una línea pura o una ida y vuelta sobre los mismos pasos
+        geom_conquista = buffer_linea
+        if distancia_extremos <= max_dist_cierre_m:
+            tipo = f"🚩 Incursión Lineal (Ida y Vuelta) ({int(franja_m)}m)"
+        else:
+            tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
 
-  return geom_conquista, tipo, geom_utm
+    return geom_conquista, tipo, geom_utm
     
 def extraer_puntos_gpx(archivo_gpx):
   tree = ET.parse(archivo_gpx)
