@@ -441,7 +441,7 @@ def cargar_cantones_la_palma():
 from shapely.ops import polygonize, unary_union
 
 
-def procesar_puntos_gpx(
+ddef procesar_puntos_gpx(
     puntos, franja_m=30.0, min_area_bucle_m2=5000.0, tolerancia_simpl_m=5.0
 ):
   """Procesa cualquier tipología de ruta GPX:
@@ -460,19 +460,16 @@ def procesar_puntos_gpx(
   gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
       "EPSG:32628"
   )
-  geom_utm = gdf_linea.geometry.iloc
+  geom_utm = gdf_linea.geometry.iloc[0]  # 👈 CON [0] OBLIGATORIO
 
-  # 2. La franja base de 30 m cubre siempre todo el camino recorrido (incluyendo tramos de ida y vuelta)
+  # 2. La franja base de 30 m cubre todo el camino recorrido (incluyendo tramos de ida y vuelta)
   buffer_linea = geom_utm.buffer(franja_m)
 
   # 3. Detección robusta de bucles interiores mediante 'polygonize'
-  # Simplificamos levemente la línea para evitar micro-cruces por ruido GPS
   linea_simplificada = geom_utm.simplify(tolerancia_simpl_m)
-
-  # Al hacer unary_union sobre las líneas o sus segmentos nodales, Shapely encuentra intersecciones reales
   poligonos_detectados = list(polygonize(unary_union(linea_simplificada)))
 
-  # Filtramos solo los polígonos que representen un área interior real (ej. > 5.000 m²)
+  # Filtramos solo los polígonos que representen un área interior real (> 5.000 m²)
   bucles_validos = [
       p
       for p in poligonos_detectados
@@ -480,22 +477,22 @@ def procesar_puntos_gpx(
   ]
 
   if bucles_validos:
-    # Unimos todos los bucles interiores detectados (por si hace más de una vuelta)
+    # Unimos todos los bucles interiores detectados
     interior_bucles = unary_union(bucles_validos).buffer(5.0)
 
     # Fusionamos el interior del bucle con el pasillo de la línea completa
     geom_conquista = unary_union([buffer_linea, interior_bucles])
 
-    p_inicio = sg.Point(geom_utm.coords)
+    p_inicio = sg.Point(geom_utm.coords[0])  # 👈 CON [0]
     p_fin = sg.Point(geom_utm.coords[-1])
     if p_inicio.distance(p_fin) <= 100.0:
       tipo = "⭕ Bucle con Aproximación / Raqueta (Interior + Pasillo)"
     else:
       tipo = "⭕ Incursión con Bucle Parcial"
   else:
-    # No hay ningún bucle significativo: es una ruta lineal o ida y vuelta sobre los mismos pasos
+    # No hay bucle cerrado significativo: es una ruta lineal o ida y vuelta sobre los mismos pasos
     geom_conquista = buffer_linea
-    p_inicio = sg.Point(geom_utm.coords)
+    p_inicio = sg.Point(geom_utm.coords[0])  # 👈 CON [0]
     p_fin = sg.Point(geom_utm.coords[-1])
     if p_inicio.distance(p_fin) <= 100.0:
       tipo = f"🚩 Incursión Lineal (Ida y Vuelta) ({int(franja_m)}m)"
@@ -503,7 +500,6 @@ def procesar_puntos_gpx(
       tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
 
   return geom_conquista, tipo, geom_utm
-
 
 def extraer_puntos_gpx(archivo_gpx):
   tree = ET.parse(archivo_gpx)
