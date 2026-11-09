@@ -441,7 +441,7 @@ def cargar_cantones_la_palma():
 from shapely.ops import polygonize, unary_union
 
 
-ddef procesar_puntos_gpx(
+def procesar_puntos_gpx(
     puntos, franja_m=30.0, min_area_bucle_m2=5000.0, tolerancia_simpl_m=5.0
 ):
   """Procesa cualquier tipología de ruta GPX:
