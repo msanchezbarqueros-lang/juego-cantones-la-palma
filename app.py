@@ -438,28 +438,63 @@ def cargar_cantones_la_palma():
 # -----------------------------------------------------------------------------
 
 
-def procesar_puntos_gpx(puntos, max_dist_cierre_m=100.0, franja_m=30.0):
+def procesar_puntos_gpx(
+    puntos, max_dist_cierre_m=100.0, franja_m=30.0, min_area_bucle_m2=5000.0
+):
+  """Procesa los puntos GPX detectando si es:
+
+  1. Bucle Cerrado Real (encierra una superficie real > 5.000 m²).
+  2. Línea de Incursión (tanto rutas de solo ida como de ida y vuelta sobre los
+  mismos pasos).
+  """
   if len(puntos) < 3:
     return None, "Error: GPX con puntos insuficientes", None
+
   linea = sg.LineString(puntos)
   gdf_linea = gpd.GeoDataFrame(geometry=[linea], crs="EPSG:4326").to_crs(
       "EPSG:32628"
   )
   geom_utm = gdf_linea.geometry.iloc[0]
 
-  # Primer punto [0] y último punto [-1]
   p_inicio = sg.Point(geom_utm.coords[0])
   p_fin = sg.Point(geom_utm.coords[-1])
 
-  if p_inicio.distance(p_fin) <= max_dist_cierre_m:
-    poligono = sg.Polygon(geom_utm.coords)
-    if not poligono.is_valid:
-      poligono = poligono.buffer(0)
-    geom_conquista = poligono.buffer(5.0)
-    tipo = "⭕ Bucle Cerrado (Dominio Interior)"
-  else:
+  distancia_cierre = p_inicio.distance(p_fin)
+
+  # Comprobamos si potencialmente se cerró el recorrido
+  es_bucle_real = False
+  geom_conquista = None
+  tipo = ""
+
+  if distancia_cierre <= max_dist_cierre_m:
+    # Intentamos crear el polígono interior
+    try:
+      # Usamos polygonize o un polígono limpio
+      poligono = sg.Polygon(geom_utm.coords)
+      if not poligono.is_valid:
+        poligono = poligono.buffer(0)
+
+      # Un bucle real debe tener un área interior sustancial (ej. > 5.000 m² o medio campo de fútbol)
+      # Si es ida y vuelta sobre los mismos pasos, su área será cercana a 0.
+      if (
+          poligono.is_valid
+          and not poligono.is_empty
+          and poligono.area >= min_area_bucle_m2
+      ):
+        geom_conquista = poligono.buffer(5.0)
+        tipo = "⭕ Bucle Cerrado (Dominio Interior)"
+        es_bucle_real = True
+    except Exception:
+      es_bucle_real = False
+
+  # Si no fue un bucle cerrado real (o fue una ida y vuelta sobre los mismos pasos):
+  if not es_bucle_real:
+    # Se genera una franja de influencia (buffer) a lo largo de toda la línea
     geom_conquista = geom_utm.buffer(franja_m)
-    tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
+    if distancia_cierre <= max_dist_cierre_m:
+      tipo = f"🚩 Incursión Lineal (Ida y Vuelta) ({int(franja_m)}m)"
+    else:
+      tipo = f"🚩 Línea de Incursión ({int(franja_m)}m)"
 
   return geom_conquista, tipo, geom_utm
 
