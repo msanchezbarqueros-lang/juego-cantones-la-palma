@@ -412,14 +412,14 @@ ESTUDIANTES = {
 # 4. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
 # -----------------------------------------------------------------------------
 @st.cache_data
-def cargar_cantones():
+@st.cache_data
+def cargar_cantones_la_palma():
   """Carga los 12 cantones históricos de Benahoare desde el archivo GeoJSON."""
   import os
 
   ruta_geojson = "cantones_la_palma.geojson"
   if os.path.exists(ruta_geojson):
     gdf = gpd.read_file(ruta_geojson)
-    # Aseguramos proyección WGS84 para visualización en Folium/Streamlit
     if gdf.crs is None or gdf.crs.to_epsg() != 4326:
       gdf = gdf.set_crs("EPSG:4326")
     return gdf
