@@ -1,40 +1,67 @@
 {
   "type": "FeatureCollection",
+  "name": "cantones_benahoare_la_palma",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
   "features": [
     {
       "type": "Feature",
       "properties": {
+        "nombre": "Tagalgen",
         "canton": "Tagalgen",
-        "municipio_actual": "Garafía",
-        "descripcion": "Cantón del extremo norte de la isla, caracterizado por profundos barrancos y pinar."
+        "region": "La Palma (Benahoare)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -17.98,
+              -17.995,
+              28.745
+            ],
+            [
+              -18.005,
+              28.77
+            ],
+            [
+              -17.995,
+              28.805
+            ],
+            [
+              -17.955,
               28.84
+            ],
+            [
+              -17.915,
+              28.855
+            ],
+            [
+              -17.875,
+              28.858
             ],
             [
               -17.88,
-              28.86
+              28.805
             ],
             [
-              -17.85,
-              28.8
+              -17.892,
+              28.754
             ],
             [
-              -17.92,
-              28.76
+              -17.925,
+              28.75
             ],
             [
-              -17.99,
-              28.79
+              -17.965,
+              28.748
             ],
             [
-              -17.98,
-              28.84
+              -17.995,
+              28.745
             ]
           ]
         ]
@@ -43,37 +70,49 @@
     {
       "type": "Feature",
       "properties": {
+        "nombre": "Tagaragre",
         "canton": "Tagaragre",
-        "municipio_actual": "Barlovento",
-        "descripcion": "Cantón del noreste insular, zona húmeda de laurisilva y monteverde."
+        "region": "La Palma (Benahoare)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
+              -17.875,
+              28.858
+            ],
+            [
+              -17.84,
+              28.855
+            ],
+            [
+              -17.805,
+              28.845
+            ],
+            [
+              -17.785,
+              28.835
+            ],
+            [
+              -17.825,
+              28.785
+            ],
+            [
+              -17.865,
+              28.745
+            ],
+            [
+              -17.875,
+              28.752
+            ],
+            [
               -17.88,
-              28.86
+              28.805
             ],
             [
-              -17.78,
-              28.83
-            ],
-            [
-              -17.78,
-              28.78
-            ],
-            [
-              -17.85,
-              28.77
-            ],
-            [
-              -17.85,
-              28.8
-            ],
-            [
-              -17.88,
-              28.86
+              -17.875,
+              28.858
             ]
           ]
         ]
@@ -82,33 +121,49 @@
     {
       "type": "Feature",
       "properties": {
+        "nombre": "Adeyahamen",
         "canton": "Adeyahamen",
-        "municipio_actual": "San Andrés y Sauces",
-        "descripcion": "Asentamiento clave con importantes cursos de agua y el gran poblado de El Tendal."
+        "region": "La Palma (Benahoare)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -17.85,
-              28.77
+              -17.785,
+              28.835
             ],
             [
-              -17.78,
-              28.78
+              -17.77,
+              28.815
             ],
             [
-              -17.74,
-              28.72
+              -17.76,
+              28.785
             ],
             [
-              -17.82,
-              28.71
+              -17.805,
+              28.755
             ],
             [
-              -17.85,
-              28.77
+              -17.848,
+              28.73
+            ],
+            [
+              -17.855,
+              28.738
+            ],
+            [
+              -17.865,
+              28.745
+            ],
+            [
+              -17.825,
+              28.785
+            ],
+            [
+              -17.785,
+              28.835
             ]
           ]
         ]
@@ -117,33 +172,45 @@
     {
       "type": "Feature",
       "properties": {
+        "nombre": "Tenagua",
         "canton": "Tenagua",
-        "municipio_actual": "Puntallana",
-        "descripcion": "Cantón oriental entre el barranco de Santa Lucía y la costa de Tenagua."
+        "region": "La Palma (Benahoare)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -17.82,
+              -17.76,
+              28.785
+            ],
+            [
+              -17.745,
+              28.75
+            ],
+            [
+              -17.745,
               28.71
             ],
             [
-              -17.74,
-              28.72
-            ],
-            [
-              -17.73,
-              28.66
-            ],
-            [
-              -17.8,
-              28.66
-            ],
-            [
-              -17.82,
+              -17.795,
               28.71
+            ],
+            [
+              -17.846,
+              28.711
+            ],
+            [
+              -17.848,
+              28.73
+            ],
+            [
+              -17.805,
+              28.755
+            ],
+            [
+              -17.76,
+              28.785
             ]
           ]
         ]
@@ -152,282 +219,434 @@
     {
       "type": "Feature",
       "properties": {
+        "nombre": "Tedote",
         "canton": "Tedote",
-        "municipio_actual": "Santa Cruz de La Palma, Breña Alta y Breña Baja",
-        "descripcion": "Cantón de la vertiente este que abarca desde la bahía de la capital hasta Las Breñas."
+        "region": "La Palma (Benahoare)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -17.8,
-              28.66
+              -17.745,
+              28.71
             ],
             [
-              -17.73,
-              28.66
+              -17.765,
+              28.685
             ],
             [
-              -17.74,
-              28.58
+              -17.77,
+              28.65
             ],
             [
-              -17.82,
-              28.58
-            ],
-            [
-              -17.8,
-              28.66
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Tigalate",
-        "municipio_actual": "Villa de Mazo",
-        "descripcion": "Extenso territorio del sureste con importantes cumbres y poblados como Belmaco."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.82,
-              28.58
-            ],
-            [
-              -17.74,
-              28.58
-            ],
-            [
-              -17.76,
-              28.5
-            ],
-            [
-              -17.84,
-              28.5
-            ],
-            [
-              -17.82,
-              28.58
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Ahenguareme",
-        "municipio_actual": "Fuencaliente",
-        "descripcion": "Extremo sur de la isla, dominado por el pinar y el volcanismo reciente de Cumbre Vieja."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.84,
-              28.5
-            ],
-            [
-              -17.76,
-              28.5
-            ],
-            [
-              -17.8,
-              28.43
-            ],
-            [
-              -17.86,
-              28.45
-            ],
-            [
-              -17.84,
-              28.5
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Guehevey",
-        "municipio_actual": "Las Manchas / Tamanca (El Paso - Los Llanos Sur)",
-        "descripcion": "Territorio del suroeste sobre coladas de lava y pastizales de Cumbre Vieja."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.9,
-              28.53
-            ],
-            [
-              -17.84,
-              28.5
-            ],
-            [
-              -17.83,
-              28.58
-            ],
-            [
-              -17.9,
-              28.58
-            ],
-            [
-              -17.9,
-              28.53
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Tahuya",
-        "municipio_actual": "El Paso y zonas llanas de Tajuya",
-        "descripcion": "Ubicado en el llano de Aridane y faldas de Cumbre Vieja."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.9,
-              28.58
-            ],
-            [
-              -17.83,
-              28.58
-            ],
-            [
-              -17.83,
-              28.64
-            ],
-            [
-              -17.91,
+              -17.765,
               28.63
             ],
             [
-              -17.9,
-              28.58
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Aridane",
-        "municipio_actual": "Los Llanos de Aridane y Tazacorte",
-        "descripcion": "Fértil valle occidental atravesado por el barranco de Las Angustias."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.96,
-              28.63
+              -17.805,
+              28.625
             ],
             [
-              -17.91,
-              28.63
+              -17.835,
+              28.615
             ],
             [
-              -17.88,
+              -17.855,
               28.67
-            ],
-            [
-              -17.95,
-              28.68
-            ],
-            [
-              -17.96,
-              28.63
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Tijarafe",
-        "municipio_actual": "Tijarafe y Puntagorda",
-        "descripcion": "Gran cantón del noroeste caracterizado por espectaculares barrancos y acantilados."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.99,
-              28.79
-            ],
-            [
-              -17.92,
-              28.76
-            ],
-            [
-              -17.88,
-              28.67
-            ],
-            [
-              -17.95,
-              28.68
-            ],
-            [
-              -17.99,
-              28.79
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "canton": "Aceró",
-        "municipio_actual": "Caldera de Taburiente (El Paso)",
-        "descripcion": "Inexpugnable anfiteatro natural de La Caldera de Taburiente, liderado por Tanausú."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -17.92,
-              28.76
             ],
             [
               -17.85,
-              28.77
+              28.69
             ],
             [
-              -17.82,
+              -17.846,
+              28.711
+            ],
+            [
+              -17.795,
               28.71
             ],
             [
-              -17.83,
-              28.64
+              -17.745,
+              28.71
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Tigalate",
+        "canton": "Tigalate",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.765,
+              28.63
             ],
             [
-              -17.88,
+              -17.775,
+              28.58
+            ],
+            [
+              -17.775,
+              28.53
+            ],
+            [
+              -17.81,
+              28.52
+            ],
+            [
+              -17.842,
+              28.515
+            ],
+            [
+              -17.838,
+              28.555
+            ],
+            [
+              -17.835,
+              28.615
+            ],
+            [
+              -17.805,
+              28.625
+            ],
+            [
+              -17.765,
+              28.63
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Ahenguareme",
+        "canton": "Ahenguareme",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.775,
+              28.53
+            ],
+            [
+              -17.805,
+              28.485
+            ],
+            [
+              -17.845,
+              28.455
+            ],
+            [
+              -17.865,
+              28.48
+            ],
+            [
+              -17.875,
+              28.515
+            ],
+            [
+              -17.855,
+              28.515
+            ],
+            [
+              -17.842,
+              28.515
+            ],
+            [
+              -17.81,
+              28.52
+            ],
+            [
+              -17.775,
+              28.53
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Tamanca",
+        "canton": "Tamanca",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.875,
+              28.515
+            ],
+            [
+              -17.89,
+              28.545
+            ],
+            [
+              -17.9,
+              28.58
+            ],
+            [
+              -17.87,
+              28.585
+            ],
+            [
+              -17.838,
+              28.555
+            ],
+            [
+              -17.842,
+              28.515
+            ],
+            [
+              -17.855,
+              28.515
+            ],
+            [
+              -17.875,
+              28.515
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Tihuya",
+        "canton": "Tihuya",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.9,
+              28.58
+            ],
+            [
+              -17.925,
+              28.615
+            ],
+            [
+              -17.94,
+              28.645
+            ],
+            [
+              -17.89,
+              28.645
+            ],
+            [
+              -17.865,
+              28.63
+            ],
+            [
+              -17.835,
+              28.615
+            ],
+            [
+              -17.838,
+              28.555
+            ],
+            [
+              -17.87,
+              28.585
+            ],
+            [
+              -17.9,
+              28.58
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Aridane",
+        "canton": "Aridane",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.94,
+              28.645
+            ],
+            [
+              -17.955,
+              28.655
+            ],
+            [
+              -17.955,
+              28.675
+            ],
+            [
+              -17.915,
+              28.685
+            ],
+            [
+              -17.89,
+              28.685
+            ],
+            [
+              -17.875,
+              28.675
+            ],
+            [
+              -17.855,
               28.67
             ],
             [
-              -17.92,
-              28.76
+              -17.835,
+              28.615
+            ],
+            [
+              -17.865,
+              28.63
+            ],
+            [
+              -17.89,
+              28.645
+            ],
+            [
+              -17.94,
+              28.645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Tijarafe",
+        "canton": "Tijarafe",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.955,
+              28.675
+            ],
+            [
+              -17.975,
+              28.705
+            ],
+            [
+              -17.995,
+              28.745
+            ],
+            [
+              -17.965,
+              28.748
+            ],
+            [
+              -17.925,
+              28.75
+            ],
+            [
+              -17.892,
+              28.754
+            ],
+            [
+              -17.91,
+              28.71
+            ],
+            [
+              -17.915,
+              28.685
+            ],
+            [
+              -17.955,
+              28.675
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Aceró",
+        "canton": "Aceró",
+        "region": "La Palma (Benahoare)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -17.915,
+              28.685
+            ],
+            [
+              -17.91,
+              28.71
+            ],
+            [
+              -17.892,
+              28.754
+            ],
+            [
+              -17.875,
+              28.752
+            ],
+            [
+              -17.865,
+              28.745
+            ],
+            [
+              -17.855,
+              28.738
+            ],
+            [
+              -17.848,
+              28.73
+            ],
+            [
+              -17.846,
+              28.711
+            ],
+            [
+              -17.85,
+              28.69
+            ],
+            [
+              -17.855,
+              28.67
+            ],
+            [
+              -17.875,
+              28.675
+            ],
+            [
+              -17.89,
+              28.685
+            ],
+            [
+              -17.915,
+              28.685
             ]
           ]
         ]
