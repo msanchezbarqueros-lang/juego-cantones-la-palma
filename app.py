@@ -412,26 +412,22 @@ ESTUDIANTES = {
 # 4. DEFINICIÓN Y CARGA DE LOS 12 CANTONES BENAHOARITAS
 # -----------------------------------------------------------------------------
 @st.cache_data
-def cargar_cantones_la_palma():
-    try:
-        gdf = gpd.read_file("cantones_la_palma.geojson")
-        return gdf
-    except Exception:
-        cantones_data = [
-            {"canton": "Tagalgen", "municipio": "Garafía", "geometry": sg.box(-17.95, 28.78, -17.85, 28.85)},
-            {"canton": "Tagaragre", "municipio": "Barlovento", "geometry": sg.box(-17.85, 28.78, -17.78, 28.84)},
-            {"canton": "Adeyahamen", "municipio": "San Andrés y Sauces", "geometry": sg.box(-17.82, 28.70, -17.74, 28.78)},
-            {"canton": "Tenagua", "municipio": "Puntallana", "geometry": sg.box(-17.79, 28.65, -17.72, 28.72)},
-            {"canton": "Tedote", "municipio": "Santa Cruz / Breñas", "geometry": sg.box(-17.82, 28.58, -17.74, 28.68)},
-            {"canton": "Tigalate", "municipio": "Mazo", "geometry": sg.box(-17.84, 28.50, -17.75, 28.60)},
-            {"canton": "Ahenguareme", "municipio": "Fuencaliente Sur", "geometry": sg.box(-17.86, 28.44, -17.80, 28.53)},
-            {"canton": "Guehevey", "municipio": "Las Manchas / Tamanca", "geometry": sg.box(-17.90, 28.53, -17.82, 28.60)},
-            {"canton": "Tahuya", "municipio": "El Paso / Los Llanos Sur", "geometry": sg.box(-17.92, 28.58, -17.84, 28.65)},
-            {"canton": "Aridane", "municipio": "Los Llanos / Tazacorte", "geometry": sg.box(-17.96, 28.62, -17.88, 28.68)},
-            {"canton": "Tijarafe", "municipio": "Tijarafe / Puntagorda", "geometry": sg.box(-17.98, 28.68, -17.88, 28.78)},
-            {"canton": "Aceró", "municipio": "Caldera de Taburiente", "geometry": sg.box(-17.88, 28.66, -17.81, 28.75)},
-        ]
-        return gpd.GeoDataFrame(cantones_data, crs="EPSG:4326")
+def cargar_cantones():
+  """Carga los 12 cantones históricos de Benahoare desde el archivo GeoJSON."""
+  import os
+
+  ruta_geojson = "cantones_la_palma.geojson"
+  if os.path.exists(ruta_geojson):
+    gdf = gpd.read_file(ruta_geojson)
+    # Aseguramos proyección WGS84 para visualización en Folium/Streamlit
+    if gdf.crs is None or gdf.crs.to_epsg() != 4326:
+      gdf = gdf.set_crs("EPSG:4326")
+    return gdf
+  else:
+    st.error(
+        "No se encontró el archivo cantones_la_palma.geojson en el repositorio."
+    )
+    return None
 
 # -----------------------------------------------------------------------------
 # 5. PROCESAMIENTO DE GPX Y PERSISTENCIA (GOOGLE DRIVE)
